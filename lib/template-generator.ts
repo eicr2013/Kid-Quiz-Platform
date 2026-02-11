@@ -39,50 +39,50 @@ function generateVariableValues(template: QuestionTemplate): GeneratedValues {
  * Example: "{num1} + {num2}" with {num1: 5, num2: 3} => "5 + 3"
  * Special handling for computed values like {total}
  */
-function replacePlaceholders(text: string, values: GeneratedValues): string {
+function replacePlaceholders(text: string, values: GeneratedValues, answerStr?: string): string {
   let result = text;
   
   // Special handling for {total} - computed from other values
   if (result.includes('{total}')) {
     let total: number;
     
-    if (values.divisor && values.quotient) {
+    if (typeof values.divisor === 'number' && typeof values.quotient === 'number') {
       // Division: total = divisor × quotient
       total = values.divisor * values.quotient;
-    } else if (values.quotient && !values.divisor && result.includes('÷ 10')) {
+    } else if (typeof values.quotient === 'number' && !values.divisor && result.includes('÷ 10')) {
       // Division by 10: total = quotient × 10
       total = values.quotient * 10;
-    } else if (values.num1 && values.missing) {
+    } else if (typeof values.num1 === 'number' && typeof values.missing === 'number') {
       // Addition: total = num1 + missing
       total = values.num1 + values.missing;
-    } else if (values.result && values.missing) {
+    } else if (typeof values.result === 'number' && typeof values.missing === 'number') {
       // Subtraction: total = result + missing
       total = values.result + values.missing;
-    } else if (values.multiplier && values.missing) {
+    } else if (typeof values.multiplier === 'number' && typeof values.missing === 'number') {
       // Multiplication: total = missing × multiplier
       total = values.missing * values.multiplier;
-    } else if (values.hours) {
+    } else if (typeof values.hours === 'number') {
       // Time: total minutes from hours
       total = values.hours * 60;
-    } else if (values.denominator && values.answer) {
+    } else if (typeof values.denominator === 'number' && typeof values.answer === 'number') {
       // Fractions: total for "1/x of total"
       total = values.denominator * values.answer;
     } else {
       // Use total from values if it exists
-      total = values.total || 0;
+      total = (typeof values.total === 'number' ? values.total : 0);
     }
     
     result = result.replace(/\{total\}/g, total.toString());
   }
   
   // Special handling for {target} in fraction equivalents
-  if (result.includes('{target}') && values.base && values.multiplier) {
+  if (result.includes('{target}') && typeof values.base === 'number' && typeof values.multiplier === 'number') {
     const target = values.base * values.multiplier;
     result = result.replace(/\{target\}/g, target.toString());
   }
   
   // Special handling for {end} in time duration
-  if (result.includes('{end}') && values.start && values.duration) {
+  if (result.includes('{end}') && typeof values.start === 'number' && typeof values.duration === 'number') {
     const end = values.start + values.duration;
     result = result.replace(/\{end\}/g, end.toString());
   }
@@ -93,9 +93,9 @@ function replacePlaceholders(text: string, values: GeneratedValues): string {
     result = result.replace(regex, value.toString());
   }
   
-  // Also replace {answer} if present
+  // Replace {answer} with actual answer if provided
   if (result.includes('{answer}')) {
-    result = result.replace(/\{answer\}/g, '[calculated]');
+    result = result.replace(/\{answer\}/g, answerStr || '[calculated]');
   }
   
   return result;
@@ -276,7 +276,7 @@ export function generateQuestionFromTemplate(template: QuestionTemplate): Genera
   // Generate method steps
   const methodSteps = template.methodStepsTemplate.map(step => ({
     step: step.step,
-    detail: replacePlaceholders(step.detail, { ...values, answer: correctAnswer })
+    detail: replacePlaceholders(step.detail, values, correctAnswer)
   }));
   
   // Generate image data if configured
