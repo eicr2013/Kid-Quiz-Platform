@@ -4,6 +4,9 @@ import { Question } from '@/types/question';
 import { getAllTemplates, getTemplatesByCategory } from '@/lib/question-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/quiz/session?categories=Category1,Category2
  * Fetches a new quiz session with 10 random questions
