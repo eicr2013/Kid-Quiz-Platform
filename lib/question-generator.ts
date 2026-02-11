@@ -61,7 +61,7 @@ export const generateQuestions = (): Question[] => {
 };
 
 // Topic 1: Bonds to 100
-function generateBondsTo100(): Question[] {
+function generateBondsTo100(): Omit<Question, 'category'>[] {
   return [
     {
       subject: "Mathematics",
@@ -150,7 +150,7 @@ function generateBondsTo100(): Question[] {
 }
 
 // Topic 2: Bonds to 10 and 20, and Doubles
-function generateBondsTo10And20AndDoubles(): Question[] {
+function generateBondsTo10And20AndDoubles(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -234,7 +234,7 @@ function generateBondsTo10And20AndDoubles(): Question[] {
 }
 
 // Topic 3: Adding and Subtracting 1-Digit Numbers
-function generateAddSubtract1Digit(): Question[] {
+function generateAddSubtract1Digit(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -318,7 +318,7 @@ function generateAddSubtract1Digit(): Question[] {
 }
 
 // Topic 4: 3-Digit Numbers
-function generate3DigitNumbers(): Question[] {
+function generate3DigitNumbers(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -404,7 +404,7 @@ function generate3DigitNumbers(): Question[] {
 }
 
 // Topic 5: Adding or Subtracting Multiples of 10 and Near Multiples
-function generateMultiplesOf10(): Question[] {
+function generateMultiplesOf10(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -492,7 +492,7 @@ function generateMultiplesOf10(): Question[] {
 }
 
 // Topic 6: Multiplying and Dividing by 3, 4, 5, and 10
-function generateMultiplyDivide(): Question[] {
+function generateMultiplyDivide(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -578,7 +578,7 @@ function generateMultiplyDivide(): Question[] {
 }
 
 // Topic 7: Doubling and Halving Odd and Even Numbers
-function generateDoublingHalving(): Question[] {
+function generateDoublingHalving(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -663,7 +663,7 @@ function generateDoublingHalving(): Question[] {
 }
 
 // Topic 8: Units of Time
-function generateUnitsOfTime(): Question[] {
+function generateUnitsOfTime(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -745,7 +745,7 @@ function generateUnitsOfTime(): Question[] {
 }
 
 // Topic 9: Telling the Time
-function generateTellingTime(): Question[] {
+function generateTellingTime(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -831,7 +831,7 @@ function generateTellingTime(): Question[] {
 }
 
 // Topic 10: 3D Shapes
-function generate3DShapes(): Question[] {
+function generate3DShapes(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -916,7 +916,7 @@ function generate3DShapes(): Question[] {
 }
 
 // Topic 11: Number Lines
-function generateNumberLines(): Question[] {
+function generateNumberLines(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1002,7 +1002,7 @@ function generateNumberLines(): Question[] {
 }
 
 // Topic 12: Rounding to the Nearest 10 or 100
-function generateRounding(): Question[] {
+function generateRounding(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1088,7 +1088,7 @@ function generateRounding(): Question[] {
 }
 
 // Topic 13: Subtract by Counting Up
-function generateSubtractByCountingUp(): Question[] {
+function generateSubtractByCountingUp(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1174,7 +1174,7 @@ function generateSubtractByCountingUp(): Question[] {
 }
 
 // Topic 14: Doubling and Halving Using Partitioning
-function generateDoublingHalvingPartitioning(): Question[] {
+function generateDoublingHalvingPartitioning(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1260,7 +1260,7 @@ function generateDoublingHalvingPartitioning(): Question[] {
 }
 
 // Topic 15: Finding Fractions of Shapes and Amounts
-function generateFractions(): Question[] {
+function generateFractions(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1343,7 +1343,7 @@ function generateFractions(): Question[] {
 }
 
 // Topic 16: Place Value of Money
-function generatePlaceValueMoney(): Question[] {
+function generatePlaceValueMoney(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1425,7 +1425,7 @@ function generatePlaceValueMoney(): Question[] {
 }
 
 // Topic 17: Making 100
-function generateMaking100(): Question[] {
+function generateMaking100(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1509,7 +1509,7 @@ function generateMaking100(): Question[] {
 }
 
 // Topic 18: Adding and Subtracting by Partitioning
-function generateAddSubtractPartitioning(): Question[] {
+function generateAddSubtractPartitioning(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1595,7 +1595,7 @@ function generateAddSubtractPartitioning(): Question[] {
 }
 
 // Topic 19: Measuring Length
-function generateMeasuringLength(): Question[] {
+function generateMeasuringLength(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1679,7 +1679,7 @@ function generateMeasuringLength(): Question[] {
 }
 
 // Topic 20: Measuring Capacity
-function generateMeasuringCapacity(): Question[] {
+function generateMeasuringCapacity(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1763,7 +1763,7 @@ function generateMeasuringCapacity(): Question[] {
 }
 
 // Topic 21: Numbers on a Number Line
-function generateNumbersOnNumberLine(): Question[] {
+function generateNumbersOnNumberLine(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1845,7 +1845,7 @@ function generateNumbersOnNumberLine(): Question[] {
 }
 
 // Topic 22: More Subtraction on Counting Up
-function generateMoreSubtractionCountingUp(): Question[] {
+function generateMoreSubtractionCountingUp(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -1931,7 +1931,7 @@ function generateMoreSubtractionCountingUp(): Question[] {
 }
 
 // Topic 23: Revising Times Tables
-function generateTimesTables(): Question[] {
+function generateTimesTables(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2013,7 +2013,7 @@ function generateTimesTables(): Question[] {
 }
 
 // Topic 24: Division with Remainders
-function generateDivisionWithRemainders(): Question[] {
+function generateDivisionWithRemainders(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2099,7 +2099,7 @@ function generateDivisionWithRemainders(): Question[] {
 }
 
 // Topic 25: Grid Method Multiplication
-function generateGridMethodMultiplication(): Question[] {
+function generateGridMethodMultiplication(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2153,7 +2153,7 @@ function generateGridMethodMultiplication(): Question[] {
 }
 
 // Topic 26: Perimeter  
-function generatePerimeter(): Question[] {
+function generatePerimeter(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2207,7 +2207,7 @@ function generatePerimeter(): Question[] {
 }
 
 // Topic 27: Ordering Numbers
-function generateOrderingNumbers(): Question[] {
+function generateOrderingNumbers(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2261,7 +2261,7 @@ function generateOrderingNumbers(): Question[] {
 }
 
 // Topic 28: Comparing Fractions
-function generateComparingFractions(): Question[] {
+function generateComparingFractions(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2315,7 +2315,7 @@ function generateComparingFractions(): Question[] {
 }
 
 // Topic 29: Identifying Multiples
-function generateIdentifyingMultiples(): Question[] {
+function generateIdentifyingMultiples(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2369,7 +2369,7 @@ function generateIdentifyingMultiples(): Question[] {
 }
 
 // Topic 30: Number Patterns and Sequences
-function generateNumberPatterns(): Question[] {
+function generateNumberPatterns(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2421,7 +2421,7 @@ function generateNumberPatterns(): Question[] {
 }
 
 // Topic 31: Writing Numbers in Words
-function generateNumberWords(): Question[] {
+function generateNumberWords(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2472,7 +2472,7 @@ function generateNumberWords(): Question[] {
 }
 
 // Topic 32: Number Before and After
-function generateNumberBeforeAfter(): Question[] {
+function generateNumberBeforeAfter(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2523,7 +2523,7 @@ function generateNumberBeforeAfter(): Question[] {
 }
 
 // Topic 33: Odd and Even Numbers
-function generateOddEven(): Question[] {
+function generateOddEven(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2575,7 +2575,7 @@ function generateOddEven(): Question[] {
 }
 
 // Topic 34: Middle Numbers
-function generateMiddleNumbers(): Question[] {
+function generateMiddleNumbers(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2628,7 +2628,7 @@ function generateMiddleNumbers(): Question[] {
 }
 
 // Topic 35: Money - Pounds and Pence
-function generateMoneyConversion(): Question[] {
+function generateMoneyConversion(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2680,7 +2680,7 @@ function generateMoneyConversion(): Question[] {
 }
 
 // Topic 36: Making Change
-function generateMakingChange(): Question[] {
+function generateMakingChange(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2732,7 +2732,7 @@ function generateMakingChange(): Question[] {
 }
 
 // Topic 37: Word Problems
-function generateWordProblems(): Question[] {
+function generateWordProblems(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2784,7 +2784,7 @@ function generateWordProblems(): Question[] {
 }
 
 // Topic 38: Number Pairs Making Totals
-function generateNumberPairs(): Question[] {
+function generateNumberPairs(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
@@ -2836,7 +2836,7 @@ function generateNumberPairs(): Question[] {
 }
 
 // Topic 39: Completing Fractions to 1
-function generateCompletingFractions(): Question[] {
+function generateCompletingFractions(): Omit<Question, "category">[] {
   return [
     {
       subject: "Mathematics",
