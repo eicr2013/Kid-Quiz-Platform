@@ -32,3 +32,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# PDFs and documentation (not needed for deployment)
+/PDF
+*.pdf
+*_SUMMARY.md
+*_GUIDE.md
+*_PLAN.md
+*_COMPLETE.md
+*_FIX.md
+*_FEATURE.md
+*_TYPES.md
+*_ADDED.md

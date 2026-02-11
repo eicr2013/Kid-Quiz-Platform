@@ -51,9 +51,9 @@ git push -u origin main
 
 1. Go to https://vercel.com/signup
 2. Click **"Continue with GitHub"**
-3. Click **"Import Project"**
+3. Click **"Import Git Repository"** (or "Add New Project")
 4. Select your `kids-quiz-app` repository
-5. Click **"Import"**
+5. Click **"Install"** (this connects your GitHub repo to Vercel)
 
 ### Step 4: Configure Environment Variables
 

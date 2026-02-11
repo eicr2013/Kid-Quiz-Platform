@@ -26,9 +26,10 @@ git push -u origin main
 
 1. Go to https://vercel.com
 2. Sign in with GitHub
-3. Click "New Project"
-4. Import your repository
-5. Add environment variables:
+3. Click "Add New" → "Project" (or "Import Git Repository")
+4. Select your repository
+5. Click "Install" (connects GitHub to Vercel)
+6. Add environment variables:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
