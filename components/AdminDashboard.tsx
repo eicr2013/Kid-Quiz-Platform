@@ -9,21 +9,90 @@ interface UserProgressData {
   categories: Record<string, CategoryProgress>;
 }
 
+interface ReviewQuestion {
+  id: string;
+  subject: string;
+  category: string;
+  topic: string;
+  difficulty: string;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  source: 'database' | 'template';
+  templateId?: string;
+}
+
 interface AdminDashboardProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const SUBJECTS = ['Mathematics', 'Science', 'Social Studies'] as const;
+
 export default function AdminDashboard({ isOpen, onClose }: AdminDashboardProps) {
+  const [tab, setTab] = useState<'progress' | 'questions'>('progress');
   const [allUsersProgress, setAllUsersProgress] = useState<Record<string, UserProgressData>>({});
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'weak' | 'strong'>('all');
+
+  // Review questions state
+  const [reviewSubject, setReviewSubject] = useState<string>('Mathematics');
+  const [reviewCategory, setReviewCategory] = useState<string>('');
+  const [categoriesForSubject, setCategoriesForSubject] = useState<{ category: string; questionCount: number }[]>([]);
+  const [reviewQuestions, setReviewQuestions] = useState<ReviewQuestion[]>([]);
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       loadAllProgress();
     }
   }, [isOpen]);
+
+  // Load categories when subject changes (for Review questions tab)
+  useEffect(() => {
+    if (!isOpen || tab !== 'questions') return;
+    const loadCategories = async () => {
+      try {
+        const res = await fetch(`/api/quiz/categories?subject=${encodeURIComponent(reviewSubject)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setCategoriesForSubject(data.categories || []);
+          if (!reviewCategory && data.categories?.length) {
+            setReviewCategory(''); // All
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load categories:', e);
+        setCategoriesForSubject([]);
+      }
+    };
+    loadCategories();
+  }, [isOpen, tab, reviewSubject]);
+
+  // Load questions when subject/category changes
+  useEffect(() => {
+    if (!isOpen || tab !== 'questions') return;
+    const loadQuestions = async () => {
+      setReviewLoading(true);
+      try {
+        const params = new URLSearchParams({ subject: reviewSubject });
+        if (reviewCategory) params.set('category', reviewCategory);
+        const res = await fetch(`/api/admin/questions?${params}`);
+        if (res.ok) {
+          const data = await res.json();
+          setReviewQuestions(data.questions || []);
+        } else {
+          setReviewQuestions([]);
+        }
+      } catch (e) {
+        console.error('Failed to load questions:', e);
+        setReviewQuestions([]);
+      } finally {
+        setReviewLoading(false);
+      }
+    };
+    loadQuestions();
+  }, [isOpen, tab, reviewSubject, reviewCategory]);
 
   const loadAllProgress = async () => {
     try {
@@ -104,7 +173,7 @@ export default function AdminDashboard({ isOpen, onClose }: AdminDashboardProps)
       <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl z-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-bold">👨‍🏫 Admin Dashboard - All Students Progress</h2>
+            <h2 className="text-3xl font-bold">👨‍🏫 Admin Dashboard</h2>
             <button
               onClick={onClose}
               className="text-white hover:text-gray-200 text-3xl font-bold"
@@ -112,11 +181,99 @@ export default function AdminDashboard({ isOpen, onClose }: AdminDashboardProps)
               ×
             </button>
           </div>
-          <p className="mt-2 text-indigo-100">Monitor and analyze student performance across all subjects</p>
+          <div className="flex gap-4 mt-3">
+            <button
+              onClick={() => setTab('progress')}
+              className={`px-4 py-2 rounded-lg font-semibold ${tab === 'progress' ? 'bg-white text-indigo-600' : 'bg-indigo-500/50 text-white hover:bg-indigo-500/70'}`}
+            >
+              📊 Student Progress
+            </button>
+            <button
+              onClick={() => setTab('questions')}
+              className={`px-4 py-2 rounded-lg font-semibold ${tab === 'questions' ? 'bg-white text-indigo-600' : 'bg-indigo-500/50 text-white hover:bg-indigo-500/70'}`}
+            >
+              📝 Review Questions
+            </button>
+          </div>
+          <p className="mt-2 text-indigo-100">
+            {tab === 'progress' ? 'Monitor and analyze student performance across all subjects' : 'Review questions and answers by subject and category'}
+          </p>
         </div>
         
         <div className="p-6">
-          {userNames.length === 0 ? (
+          {tab === 'questions' ? (
+            <div className="space-y-6">
+              <div className="flex flex-wrap gap-4 items-end">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                  <select
+                    value={reviewSubject}
+                    onChange={(e) => { setReviewSubject(e.target.value); setReviewCategory(''); }}
+                    className="border border-gray-300 rounded-lg px-4 py-2 min-w-[180px]"
+                  >
+                    {SUBJECTS.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category (subsection)</label>
+                  <select
+                    value={reviewCategory}
+                    onChange={(e) => setReviewCategory(e.target.value)}
+                    className="border border-gray-300 rounded-lg px-4 py-2 min-w-[200px]"
+                  >
+                    <option value="">All categories</option>
+                    {categoriesForSubject.map(c => (
+                      <option key={c.category} value={c.category}>
+                        {c.category} ({c.questionCount} questions)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {reviewLoading ? (
+                <p className="text-gray-500">Loading questions…</p>
+              ) : reviewQuestions.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  No questions found for this subject{reviewCategory ? ` and category (${reviewCategory})` : ''}.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600 font-medium">{reviewQuestions.length} question(s)</p>
+                  <div className="space-y-6">
+                    {reviewQuestions.map((q, idx) => (
+                      <div key={q.id} className="border border-gray-200 rounded-xl p-5 bg-gray-50/50">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span className="text-xs font-medium text-gray-500">#{idx + 1}</span>
+                          <span className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs">{q.category}</span>
+                          <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-xs">{q.difficulty}</span>
+                          {q.source === 'template' && (
+                            <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-xs">Template (sample)</span>
+                          )}
+                        </div>
+                        <p className="font-medium text-gray-900 mb-3">{q.question}</p>
+                        <div className="space-y-1 mb-3">
+                          {q.options.map((opt, i) => (
+                            <div
+                              key={i}
+                              className={`py-1.5 px-3 rounded-lg ${opt === q.correctAnswer ? 'bg-green-100 border border-green-400 text-green-800 font-medium' : 'bg-white border border-gray-200 text-gray-700'}`}
+                            >
+                              {opt === q.correctAnswer && '✓ '}{opt}
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium text-gray-700">Correct answer:</span>{' '}
+                          <span className="text-green-700 font-semibold">{q.correctAnswer}</span>
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : userNames.length === 0 ? (
             <div className="text-center py-12">
               <span className="text-6xl mb-4 block">📊</span>
               <p className="text-xl text-gray-600">No student data available yet</p>
