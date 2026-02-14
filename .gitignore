@@ -33,6 +33,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Exclude grade-specific content
+/GRADE 3/
+
 # PDFs and documentation (not needed for deployment)
 /PDF
 *.pdf

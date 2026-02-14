@@ -27,6 +27,10 @@ function generateRandomValue(def: VariableDefinition): number {
 function generateVariableValues(template: QuestionTemplate): GeneratedValues {
   const values: GeneratedValues = {};
   
+  if (!template.variables) {
+    return values;
+  }
+  
   for (const [varName, varDef] of Object.entries(template.variables)) {
     values[varName] = generateRandomValue(varDef);
   }
@@ -61,12 +65,33 @@ function replacePlaceholders(text: string, values: GeneratedValues, answerStr?: 
     } else if (typeof values.multiplier === 'number' && typeof values.missing === 'number') {
       // Multiplication: total = missing × multiplier
       total = values.missing * values.multiplier;
+    } else if (typeof values.ml1 === 'number' && typeof values.ml2 === 'number') {
+      // Capacity addition: ml1 + ml2
+      total = values.ml1 + values.ml2;
+    } else if (typeof values.weight1 === 'number' && typeof values.weight2 === 'number') {
+      // Weight addition: weight1 + weight2
+      total = values.weight1 + values.weight2;
+    } else if (typeof values.cost1 === 'number' && typeof values.cost2 === 'number') {
+      // Money addition: cost1 + cost2
+      total = values.cost1 + values.cost2;
+    } else if (typeof values.length === 'number' && typeof values.width === 'number') {
+      // Perimeter calculations: 2 * length + 2 * width
+      total = 2 * values.length;
+    } else if (typeof values.hundreds === 'number' && typeof values.tens === 'number') {
+      // Place value: tens * 10 + units (for rounding to 100)
+      total = values.tens * 10 + (typeof values.units === 'number' ? values.units : 0);
     } else if (typeof values.hours === 'number') {
       // Time: total minutes from hours
       total = values.hours * 60;
     } else if (typeof values.denominator === 'number' && typeof values.answer === 'number') {
       // Fractions: total for "1/x of total"
       total = values.denominator * values.answer;
+    } else if (typeof values.num2 === 'number') {
+      // Comparisons: convert kg to g, l to ml, m to cm
+      total = values.num2 * 1000;
+    } else if (typeof values.cap2 === 'number') {
+      // Capacity comparisons: convert l to ml
+      total = values.cap2 * 1000;
     } else {
       // Use total from values if it exists
       total = (typeof values.total === 'number' ? values.total : 0);
@@ -75,9 +100,24 @@ function replacePlaceholders(text: string, values: GeneratedValues, answerStr?: 
     result = result.replace(/\{total\}/g, total.toString());
   }
   
-  // Special handling for {target} in fraction equivalents
-  if (result.includes('{target}') && typeof values.base === 'number' && typeof values.multiplier === 'number') {
-    const target = values.base * values.multiplier;
+  // Special handling for {target} in fraction equivalents and other calculations
+  if (result.includes('{target}') && typeof values.target !== 'number') {
+    // Only compute target if it's NOT already defined as a variable
+    let target: number;
+    
+    if (typeof values.base === 'number' && typeof values.multiplier === 'number') {
+      // Fraction equivalents: base * multiplier
+      target = values.base * values.multiplier;
+    } else if (typeof values.width === 'number') {
+      // Perimeter: 2 * width
+      target = 2 * values.width;
+    } else if (typeof values.tens === 'number') {
+      // Place value: tens * 10
+      target = values.tens * 10;
+    } else {
+      target = 0;
+    }
+    
     result = result.replace(/\{target\}/g, target.toString());
   }
   
@@ -87,6 +127,26 @@ function replacePlaceholders(text: string, values: GeneratedValues, answerStr?: 
     result = result.replace(/\{end\}/g, end.toString());
   }
   
+  // Special handling for {number} - built from components
+  if (result.includes('{number}')) {
+    let number: number;
+    
+    if (typeof values.hundreds === 'number' && typeof values.tens === 'number' && typeof values.units === 'number') {
+      // Place value: build full number from hundreds, tens, units
+      number = values.hundreds * 100 + values.tens * 10 + values.units;
+    } else if (typeof values.tens === 'number' && typeof values.units === 'number') {
+      // Two-digit number from tens and units
+      number = values.tens * 10 + values.units;
+    } else if (typeof values.number === 'number') {
+      // Direct number value
+      number = values.number;
+    } else {
+      number = 0;
+    }
+    
+    result = result.replace(/\{number\}/g, number.toString());
+  }
+
   for (const [varName, value] of Object.entries(values)) {
     // Replace all occurrences of {varName}
     const regex = new RegExp(`\\{${varName}\\}`, 'g');
@@ -245,39 +305,62 @@ function generateWrongAnswers(
  * Generate a complete question from a template
  */
 export function generateQuestionFromTemplate(template: QuestionTemplate): GeneratedQuestion {
-  // Generate random values for all variables
-  const values = generateVariableValues(template);
+  // Check if this is a static template (Science) or dynamic template (Math)
+  const isStaticTemplate = !template.answerFormula && template.correctAnswerFormula;
   
-  // Special handling: if template has quotient but not divisor, and question mentions ÷ 10
-  if (template.questionTemplate.includes('÷ 10') && values.quotient && !values.divisor) {
-    values.divisor = 10;
+  let correctAnswer: string;
+  let questionText: string;
+  let allOptions: string[];
+  let methodSteps: Array<{ step: string; detail: string }>;
+  let values: GeneratedValues = {};
+  
+  if (isStaticTemplate) {
+    // Static template (Science) - direct values, no formulas
+    correctAnswer = template.correctAnswerFormula as string;
+    questionText = template.questionTemplate;
+    allOptions = [correctAnswer, ...(template.wrongAnswers || [])];
+    
+    // Convert simple string array to step objects
+    methodSteps = (template.methodSteps || []).map((step, index) => ({
+      step: (index + 1).toString(),
+      detail: step
+    }));
+  } else {
+    // Dynamic template (Math) - formulas to evaluate
+    // Generate random values for all variables
+    values = generateVariableValues(template);
+    
+    // Special handling: if template has quotient but not divisor, and question mentions ÷ 10
+    if (template.questionTemplate.includes('÷ 10') && values.quotient && !values.divisor) {
+      values.divisor = 10;
+    }
+    
+    // Calculate the correct answer
+    const correctAnswerResult = evaluateFormula(template.answerFormula!, values);
+    correctAnswer = typeof correctAnswerResult === 'string' 
+      ? correctAnswerResult 
+      : correctAnswerResult.toString();
+    
+    // Generate the question text
+    questionText = replacePlaceholders(template.questionTemplate, values);
+    
+    // Generate options
+    const correctAnswerNum = typeof correctAnswerResult === 'number' 
+      ? correctAnswerResult 
+      : parseFloat(correctAnswer.split(' ')[0]); // Extract number from "5 R1"
+    
+    const wrongAnswers = generateWrongAnswers(correctAnswerNum, template, values, correctAnswer);
+    allOptions = [correctAnswer, ...wrongAnswers];
+    
+    // Generate method steps
+    methodSteps = (template.methodStepsTemplate || []).map(step => ({
+      step: step.step,
+      detail: replacePlaceholders(step.detail, values, correctAnswer)
+    }));
   }
-  
-  // Calculate the correct answer
-  const correctAnswerResult = evaluateFormula(template.answerFormula, values);
-  const correctAnswer = typeof correctAnswerResult === 'string' 
-    ? correctAnswerResult 
-    : correctAnswerResult.toString();
-  
-  // Generate the question text
-  const questionText = replacePlaceholders(template.questionTemplate, values);
-  
-  // Generate options
-  const correctAnswerNum = typeof correctAnswerResult === 'number' 
-    ? correctAnswerResult 
-    : parseFloat(correctAnswer.split(' ')[0]); // Extract number from "5 R1"
-  
-  const wrongAnswers = generateWrongAnswers(correctAnswerNum, template, values, correctAnswer);
-  const allOptions = [correctAnswer, ...wrongAnswers];
   
   // Shuffle options
   const shuffledOptions = allOptions.sort(() => Math.random() - 0.5);
-  
-  // Generate method steps
-  const methodSteps = template.methodStepsTemplate.map(step => ({
-    step: step.step,
-    detail: replacePlaceholders(step.detail, values, correctAnswer)
-  }));
   
   // Generate image data if configured
   let imageData;
@@ -300,11 +383,16 @@ export function generateQuestionFromTemplate(template: QuestionTemplate): Genera
     }
   }
   
+  // Determine subject based on category or default
+  const subject = ['Rocks and Soils', 'Living Things', 'Animals', 'Plants', 'Human Body', 'Food Chains', 'Water Cycle', 'Materials', 'Forces'].includes(template.category)
+    ? 'Science'
+    : 'Mathematics';
+  
   return {
     id: `${template.id}-${Date.now()}-${Math.random()}`,
     templateId: template.id,
     generatedValues: values,
-    subject: 'Mathematics',
+    subject: subject,
     category: template.category,
     topic: template.topic,
     difficulty: template.difficulty,
@@ -312,8 +400,8 @@ export function generateQuestionFromTemplate(template: QuestionTemplate): Genera
     options: shuffledOptions,
     correctAnswer: correctAnswer,
     methodSteps: methodSteps,
-    questionType: template.questionType,
-    estimatedTimeSeconds: template.estimatedTimeSeconds,
+    questionType: template.questionType || 'mcq',
+    estimatedTimeSeconds: template.estimatedTimeSeconds || 30,
     image: imageData
   };
 }

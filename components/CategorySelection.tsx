@@ -9,10 +9,17 @@ interface Category {
 
 interface CategorySelectionProps {
   onStartQuiz: (selectedCategories: string[]) => void;
+  onOpenSettings?: () => void;
+  onOpenProgress?: () => void;
+  userName?: string;
+  onLogout?: () => void;
+  onBackToSubjects?: () => void;
+  subject?: string | null;
 }
 
 // Emoji mapping for categories
 const CATEGORY_EMOJIS: Record<string, string> = {
+  // Mathematics
   'Addition': '➕',
   'Subtraction': '➖',
   'Multiplication': '✖️',
@@ -20,10 +27,34 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   'Shapes and Measure': '📐',
   'Fractions': '🍰',
   'Mixed Operations': '🔢',
-  'Units of Time': '⏰'
+  'Units of Time': '⏰',
+  'Money': '💰',
+  'Measurement - Weight': '⚖️',
+  'Measurement - Length': '📏',
+  'Measurement - Capacity': '🥤',
+  'Place Value': '🔢',
+  'Number Properties': '🔢',
+  // Science
+  'Rocks and Soils': '🪨',
+  'Living Things': '🌱',
+  'Animals': '🦁',
+  'Plants': '🌿',
+  'Human Body': '👤',
+  'Food Chains': '🦊',
+  'Water Cycle': '💧',
+  'Materials': '🧪',
+  'Forces': '⚡'
 };
 
-export default function CategorySelection({ onStartQuiz }: CategorySelectionProps) {
+// Subject emoji mapping
+const SUBJECT_EMOJIS: Record<string, string> = {
+  'Mathematics': '🔢',
+  'Science': '🔬',
+  'English': '📚',
+  'Social Studies': '🌍'
+};
+
+export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenProgress, userName, onLogout, onBackToSubjects, subject }: CategorySelectionProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +66,12 @@ export default function CategorySelection({ onStartQuiz }: CategorySelectionProp
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/quiz/categories');
+      const params = new URLSearchParams();
+      if (subject) {
+        params.append('subject', subject);
+      }
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+      const response = await fetch(`/api/quiz/categories${queryString}`);
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
@@ -97,16 +133,67 @@ export default function CategorySelection({ onStartQuiz }: CategorySelectionProp
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-6 relative">
+      {/* Top Right Buttons */}
+      <div className="fixed top-4 right-4 flex gap-2 z-50">
+        {onOpenProgress && (
+          <button
+            onClick={onOpenProgress}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+          >
+            📊 Progress
+          </button>
+        )}
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+          >
+            ⚙️ Settings
+          </button>
+        )}
+      </div>
+
+      {/* User Info - Top Left */}
+      {userName && (
+        <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-purple-300 z-50">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">👤</span>
+            <span className="font-bold text-gray-800">{userName}</span>
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="ml-2 text-xs text-red-600 hover:text-red-800 underline"
+              >
+                Logout
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-2xl p-8">
+          {/* Back to Subjects Button - Top */}
+          {onBackToSubjects && (
+            <div className="mb-6">
+              <button
+                onClick={onBackToSubjects}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 transition-colors border-2 border-purple-200"
+              >
+                <span>🏠</span>
+                <span>Back to Subjects</span>
+              </button>
+            </div>
+          )}
+          
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-purple-600 mb-2">
-              Choose What to Practice
+              {SUBJECT_EMOJIS[subject || 'Mathematics'] || '📚'} {subject || 'Mathematics'} Topics
             </h1>
             <p className="text-gray-600 text-lg">
-              Select one or more math topics. You'll get 10 questions to practice!
+              Select one or more topics. You'll get 10 questions to practice!
             </p>
           </div>
 

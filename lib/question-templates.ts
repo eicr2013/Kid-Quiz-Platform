@@ -30,7 +30,7 @@ export const additionTemplates: QuestionTemplate[] = [
     estimatedTimeSeconds: 15
   },
 
-  // Bonds to Variable Target - Easy (50, 60, 70, 80, 90)
+  // Bonds to Variable Target - Easy (50, 60, 70, 80, 90) - FIXED: ensures num1 < target
   {
     id: 'addition-bonds-variable-easy',
     category: 'Addition',
@@ -38,8 +38,8 @@ export const additionTemplates: QuestionTemplate[] = [
     difficulty: 'Easy',
     questionTemplate: '{num1} + ___ = {target}. What number goes in the blank?',
     variables: {
-      target: { min: 50, max: 90, step: 10 },
-      num1: { min: 10, max: 40, step: 5 }
+      target: { min: 60, max: 90, step: 10 },  // Changed: higher minimum
+      num1: { min: 10, max: 45, step: 5 }      // Changed: lower maximum to ensure num1 < target
     },
     answerFormula: 'target - num1',
     wrongAnswerFormulas: [
@@ -57,7 +57,7 @@ export const additionTemplates: QuestionTemplate[] = [
     estimatedTimeSeconds: 15
   },
   
-  // Bonds to Variable Target - Medium
+  // Bonds to Variable Target - Medium (FIXED: ensures num1 < target)
   {
     id: 'addition-bonds-variable-medium',
     category: 'Addition',
@@ -65,8 +65,8 @@ export const additionTemplates: QuestionTemplate[] = [
     difficulty: 'Medium',
     questionTemplate: 'If you have {num1} marbles, how many more do you need to have {target} marbles?',
     variables: {
-      target: { min: 60, max: 100, step: 10 },
-      num1: { min: 15, max: 75, step: 5 }
+      target: { min: 80, max: 100, step: 10 },  // Changed: higher minimum
+      num1: { min: 15, max: 60, step: 5 }       // Changed: lower maximum to ensure num1 < target
     },
     answerFormula: 'target - num1',
     wrongAnswerFormulas: [
@@ -1189,6 +1189,632 @@ export const timeTemplates: QuestionTemplate[] = [
   }
 ];
 
+// ============================================================================
+// MONEY TEMPLATES
+// ============================================================================
+
+const moneyTemplates: QuestionTemplate[] = [
+  {
+    id: 'money-add-pence-easy',
+    category: 'Money',
+    topic: 'Adding Money',
+    difficulty: 'Easy',
+    questionTemplate: '{num1}p + {num2}p = ___',
+    variables: {
+      num1: { min: 5, max: 50, step: 5 },
+      num2: { min: 5, max: 50, step: 5 },
+    },
+    answerFormula: 'num1 + num2 + "p"',
+    wrongAnswerFormulas: [
+      '(num1 + num2 + 5) + "p"',
+      '(num1 + num2 - 5) + "p"',
+      '(num1 + num2 + 10) + "p"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Add the pence amounts: {num1}p + {num2}p' },
+      { step: '2', detail: 'Calculate: {num1} + {num2} = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'money-subtract-pence-easy',
+    category: 'Money',
+    topic: 'Subtracting Money',
+    difficulty: 'Easy',
+    questionTemplate: '{num1}p - {num2}p = ___',
+    variables: {
+      num1: { min: 20, max: 50, step: 5 },
+      num2: { min: 5, max: 15, step: 5 },
+    },
+    answerFormula: 'num1 - num2 + "p"',
+    wrongAnswerFormulas: [
+      '(num1 - num2 + 5) + "p"',
+      '(num1 - num2 - 5) + "p"',
+      '(num1 + num2) + "p"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Subtract the pence amounts: {num1}p - {num2}p' },
+      { step: '2', detail: 'Calculate: {num1} - {num2} = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'money-change-medium',
+    category: 'Money',
+    topic: 'Finding Change',
+    difficulty: 'Medium',
+    questionTemplate: 'An item costs £{cost}. You pay with £{paid}. How much change?',
+    variables: {
+      cost: { min: 2, max: 8, step: 1 },
+      paid: { min: 10, max: 10, step: 1 },
+    },
+    answerFormula: '"£" + (paid - cost)',
+    wrongAnswerFormulas: [
+      '"£" + (paid - cost + 1)',
+      '"£" + (paid - cost - 1)',
+      '"£" + cost',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'You paid £{paid}' },
+      { step: '2', detail: 'The item cost £{cost}' },
+      { step: '3', detail: 'Subtract: {paid} - {cost} = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 45
+  },
+  {
+    id: 'money-total-cost-medium',
+    category: 'Money',
+    topic: 'Total Cost',
+    difficulty: 'Medium',
+    questionTemplate: 'A pencil costs {item1}p and an eraser costs {item2}p. How much for both?',
+    variables: {
+      item1: { min: 10, max: 50, step: 5 },
+      item2: { min: 10, max: 50, step: 5 },
+    },
+    answerFormula: 'item1 + item2 + "p"',
+    wrongAnswerFormulas: [
+      '(item1 + item2 + 10) + "p"',
+      '(item1 + item2 - 10) + "p"',
+      'item1 + "p"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Pencil costs {item1}p' },
+      { step: '2', detail: 'Eraser costs {item2}p' },
+      { step: '3', detail: 'Add them: {item1} + {item2} = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 45
+  },
+  {
+    id: 'money-change-hard',
+    category: 'Money',
+    topic: 'Finding Change',
+    difficulty: 'Hard',
+    questionTemplate: 'You buy 2 items: one for £{cost1} and one for £{cost2}. You pay with £20. How much change?',
+    variables: {
+      cost1: { min: 3, max: 7, step: 1 },
+      cost2: { min: 2, max: 5, step: 1 },
+    },
+    answerFormula: '"£" + (20 - cost1 - cost2)',
+    wrongAnswerFormulas: [
+      '"£" + (20 - cost1 - cost2 + 1)',
+      '"£" + (20 - cost1 - cost2 - 1)',
+      '"£" + (cost1 + cost2)',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'First item: £{cost1}, Second item: £{cost2}' },
+      { step: '2', detail: 'Total cost: {cost1} + {cost2} = {total}' },
+      { step: '3', detail: 'Change: 20 - {total} = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 60
+  },
+];
+
+// ============================================================================
+// MEASUREMENT - WEIGHT TEMPLATES
+// ============================================================================
+
+const weightTemplates: QuestionTemplate[] = [
+  {
+    id: 'weight-kg-g-easy',
+    category: 'Measurement - Weight',
+    topic: 'Converting kg to g',
+    difficulty: 'Easy',
+    questionTemplate: '{kg}kg = ___ g',
+    variables: {
+      kg: { min: 1, max: 5, step: 1 },
+    },
+    answerFormula: '(kg * 1000) + "g"',
+    wrongAnswerFormulas: [
+      '(kg * 100) + "g"',
+      '(kg * 10) + "g"',
+      '(kg * 1000 + 100) + "g"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: '1 kilogram = 1000 grams' },
+      { step: '2', detail: 'Multiply: {kg} × 1000 = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'weight-g-kg-easy',
+    category: 'Measurement - Weight',
+    topic: 'Converting g to kg',
+    difficulty: 'Easy',
+    questionTemplate: '{g}g = ___ kg',
+    variables: {
+      g: { min: 1000, max: 5000, step: 1000 },
+    },
+    answerFormula: '(g / 1000) + "kg"',
+    wrongAnswerFormulas: [
+      '(g / 100) + "kg"',
+      'g + "kg"',
+      '(g / 1000 + 1) + "kg"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: '1000 grams = 1 kilogram' },
+      { step: '2', detail: 'Divide: {g} ÷ 1000 = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'weight-compare-medium',
+    category: 'Measurement - Weight',
+    topic: 'Comparing Weights',
+    difficulty: 'Medium',
+    questionTemplate: 'Which is heavier: {num1}g or {num2}kg?',
+    variables: {
+      num1: { min: 500, max: 1500, step: 100 },
+      num2: { min: 1, max: 2, step: 1 },
+    },
+    answerFormula: 'num1 > (num2 * 1000) ? num1 + "g" : num2 + "kg"',
+    wrongAnswerFormulas: [
+      'num1 < (num2 * 1000) ? num1 + "g" : num2 + "kg"',
+      'num1 + "g"',
+      'num2 + "kg"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Convert {num2}kg to grams: {num2} × 1000 = {total}g' },
+      { step: '2', detail: 'Compare {num1}g with {total}g' },
+      { step: '3', detail: 'The larger amount is heavier: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 45
+  },
+  {
+    id: 'weight-add-hard',
+    category: 'Measurement - Weight',
+    topic: 'Adding Weights',
+    difficulty: 'Hard',
+    questionTemplate: '{weight1}g + {weight2}g = ___ kg',
+    variables: {
+      weight1: { min: 300, max: 700, step: 100 },
+      weight2: { min: 300, max: 700, step: 100 },
+    },
+    answerFormula: '(weight1 + weight2) / 1000 + "kg"',
+    wrongAnswerFormulas: [
+      '(weight1 + weight2) / 100 + "kg"',
+      '(weight1 + weight2) + "g"',
+      '((weight1 + weight2) / 1000 + 0.5) + "kg"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Add the weights: {weight1}g + {weight2}g = {total}g' },
+      { step: '2', detail: 'Convert to kg: {total} ÷ 1000 = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 60
+  },
+];
+
+// ============================================================================
+// MEASUREMENT - LENGTH TEMPLATES
+// ============================================================================
+
+const lengthTemplates: QuestionTemplate[] = [
+  {
+    id: 'length-cm-m-easy',
+    category: 'Measurement - Length',
+    topic: 'Converting cm to m',
+    difficulty: 'Easy',
+    questionTemplate: '{cm}cm = ___ m',
+    variables: {
+      cm: { min: 100, max: 500, step: 100 },
+    },
+    answerFormula: '(cm / 100) + "m"',
+    wrongAnswerFormulas: [
+      '(cm / 10) + "m"',
+      '(cm / 1000) + "m"',
+      'cm + "m"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: '1 meter = 100 centimeters' },
+      { step: '2', detail: 'Divide: {cm} ÷ 100 = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'length-m-cm-easy',
+    category: 'Measurement - Length',
+    topic: 'Converting m to cm',
+    difficulty: 'Easy',
+    questionTemplate: '{m}m = ___ cm',
+    variables: {
+      m: { min: 1, max: 5, step: 1 },
+    },
+    answerFormula: '(m * 100) + "cm"',
+    wrongAnswerFormulas: [
+      '(m * 10) + "cm"',
+      '(m * 1000) + "cm"',
+      'm + "cm"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: '1 meter = 100 centimeters' },
+      { step: '2', detail: 'Multiply: {m} × 100 = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'length-perimeter-medium',
+    category: 'Measurement - Length',
+    topic: 'Perimeter',
+    difficulty: 'Medium',
+    questionTemplate: 'A square has sides of {side}cm. What is its perimeter?',
+    variables: {
+      side: { min: 3, max: 8, step: 1 },
+    },
+    answerFormula: '(4 * side) + "cm"',
+    wrongAnswerFormulas: [
+      '(side * side) + "cm"',
+      '(side + side) + "cm"',
+      '(4 * side + 4) + "cm"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'A square has 4 equal sides' },
+      { step: '2', detail: 'Perimeter = 4 × side length' },
+      { step: '3', detail: 'Calculate: 4 × {side} = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 45
+  },
+  {
+    id: 'length-perimeter-rectangle-hard',
+    category: 'Measurement - Length',
+    topic: 'Perimeter',
+    difficulty: 'Hard',
+    questionTemplate: 'A rectangle has length {length}cm and width {width}cm. What is its perimeter?',
+    variables: {
+      length: { min: 5, max: 10, step: 1 },
+      width: { min: 2, max: 5, step: 1 },
+    },
+    answerFormula: '(2 * length + 2 * width) + "cm"',
+    wrongAnswerFormulas: [
+      '(length + width) + "cm"',
+      '(length * width) + "cm"',
+      '(2 * length + 2 * width + 2) + "cm"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Perimeter = 2 × length + 2 × width' },
+      { step: '2', detail: 'Calculate: 2 × {length} + 2 × {width}' },
+      { step: '3', detail: 'Answer: {total} + {target} = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 60
+  },
+];
+
+// ============================================================================
+// MEASUREMENT - CAPACITY TEMPLATES
+// ============================================================================
+
+const capacityTemplates: QuestionTemplate[] = [
+  {
+    id: 'capacity-ml-l-easy',
+    category: 'Measurement - Capacity',
+    topic: 'Converting ml to l',
+    difficulty: 'Easy',
+    questionTemplate: '{ml}ml = ___ l',
+    variables: {
+      ml: { min: 1000, max: 5000, step: 1000 },
+    },
+    answerFormula: '(ml / 1000) + "l"',
+    wrongAnswerFormulas: [
+      '(ml / 100) + "l"',
+      'ml + "l"',
+      '(ml / 1000 + 1) + "l"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: '1 liter = 1000 milliliters' },
+      { step: '2', detail: 'Divide: {ml} ÷ 1000 = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'capacity-l-ml-easy',
+    category: 'Measurement - Capacity',
+    topic: 'Converting l to ml',
+    difficulty: 'Easy',
+    questionTemplate: '{l}l = ___ ml',
+    variables: {
+      l: { min: 1, max: 5, step: 1 },
+    },
+    answerFormula: '(l * 1000) + "ml"',
+    wrongAnswerFormulas: [
+      '(l * 100) + "ml"',
+      '(l * 10) + "ml"',
+      'l + "ml"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: '1 liter = 1000 milliliters' },
+      { step: '2', detail: 'Multiply: {l} × 1000 = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'capacity-compare-medium',
+    category: 'Measurement - Capacity',
+    topic: 'Comparing Capacity',
+    difficulty: 'Medium',
+    questionTemplate: 'Which holds more: {cap1}ml or {cap2}l?',
+    variables: {
+      cap1: { min: 500, max: 1500, step: 100 },
+      cap2: { min: 1, max: 2, step: 1 },
+    },
+    answerFormula: 'cap1 > (cap2 * 1000) ? cap1 + "ml" : cap2 + "l"',
+    wrongAnswerFormulas: [
+      'cap1 < (cap2 * 1000) ? cap1 + "ml" : cap2 + "l"',
+      'cap1 + "ml"',
+      'cap2 + "l"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Convert {cap2}l to ml: {cap2} × 1000 = {total}ml' },
+      { step: '2', detail: 'Compare {cap1}ml with {total}ml' },
+      { step: '3', detail: 'The larger amount holds more: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 45
+  },
+  {
+    id: 'capacity-add-hard',
+    category: 'Measurement - Capacity',
+    topic: 'Adding Capacity',
+    difficulty: 'Hard',
+    questionTemplate: '{ml1}ml + {ml2}ml = ___ l',
+    variables: {
+      ml1: { min: 200, max: 600, step: 100 },
+      ml2: { min: 400, max: 800, step: 100 },
+    },
+    answerFormula: '(ml1 + ml2) / 1000 + "l"',
+    wrongAnswerFormulas: [
+      '(ml1 + ml2) / 100 + "l"',
+      '(ml1 + ml2) + "ml"',
+      '((ml1 + ml2) / 1000 + 0.5) + "l"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Add: {ml1}ml + {ml2}ml = {total}ml' },
+      { step: '2', detail: 'Convert to liters: {total} ÷ 1000 = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 60
+  },
+];
+
+// ============================================================================
+// PLACE VALUE TEMPLATES
+// ============================================================================
+
+const placeValueTemplates: QuestionTemplate[] = [
+  {
+    id: 'place-value-build-easy',
+    category: 'Place Value',
+    topic: 'Building Numbers',
+    difficulty: 'Easy',
+    questionTemplate: '{hundreds} hundreds + {tens} tens + {units} units = ___',
+    variables: {
+      hundreds: { min: 1, max: 5, step: 1 },
+      tens: { min: 0, max: 9, step: 1 },
+      units: { min: 0, max: 9, step: 1 },
+    },
+    answerFormula: 'hundreds * 100 + tens * 10 + units',
+    wrongAnswerFormulas: [
+      'hundreds * 100 + tens * 10 + units + 10',
+      'hundreds * 100 + tens * 10 + units - 10',
+      'hundreds + tens + units',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Multiply: {hundreds} × 100 = {total}' },
+      { step: '2', detail: 'Multiply: {tens} × 10 = {target}' },
+      { step: '3', detail: 'Add: {total} + {target} + {units} = {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 45
+  },
+  {
+    id: 'place-value-identify-easy',
+    category: 'Place Value',
+    topic: 'Identifying Place Value',
+    difficulty: 'Easy',
+    questionTemplate: 'What is the tens digit in {number}?',
+    variables: {
+      hundreds: { min: 1, max: 9, step: 1 },
+      tens: { min: 0, max: 9, step: 1 },
+      units: { min: 0, max: 9, step: 1 },
+    },
+    answerFormula: 'tens',
+    wrongAnswerFormulas: [
+      'units',
+      'hundreds',
+      'tens + 1',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'The number is {number}' },
+      { step: '2', detail: 'The tens digit is in the middle: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'place-value-round-10-medium',
+    category: 'Place Value',
+    topic: 'Rounding',
+    difficulty: 'Medium',
+    questionTemplate: 'Round {number} to the nearest 10',
+    variables: {
+      tens: { min: 2, max: 9, step: 1 },
+      units: { min: 0, max: 9, step: 1 },
+    },
+    answerFormula: 'units >= 5 ? (tens + 1) * 10 : tens * 10',
+    wrongAnswerFormulas: [
+      'tens * 10',
+      '(tens + 1) * 10',
+      'tens * 10 + 5',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'The number is {number}' },
+      { step: '2', detail: 'Look at the units digit: {units}' },
+      { step: '3', detail: 'If 5 or more, round up. If less than 5, round down' },
+      { step: '4', detail: 'Answer: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 45
+  },
+  {
+    id: 'place-value-round-100-hard',
+    category: 'Place Value',
+    topic: 'Rounding',
+    difficulty: 'Hard',
+    questionTemplate: 'Round {number} to the nearest 100',
+    variables: {
+      hundreds: { min: 2, max: 7, step: 1 },
+      tens: { min: 0, max: 9, step: 1 },
+      units: { min: 0, max: 9, step: 1 },
+    },
+    answerFormula: 'tens * 10 + units >= 50 ? (hundreds + 1) * 100 : hundreds * 100',
+    wrongAnswerFormulas: [
+      'hundreds * 100',
+      '(hundreds + 1) * 100',
+      'hundreds * 100 + 50',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'The number is {number}' },
+      { step: '2', detail: 'Look at the last two digits: {total}' },
+      { step: '3', detail: 'If 50 or more, round up. If less than 50, round down' },
+      { step: '4', detail: 'Answer: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 60
+  },
+];
+
+// ============================================================================
+// NUMBER PROPERTIES TEMPLATES
+// ============================================================================
+
+const numberPropertiesTemplates: QuestionTemplate[] = [
+  {
+    id: 'even-odd-identify-easy',
+    category: 'Number Properties',
+    topic: 'Even and Odd',
+    difficulty: 'Easy',
+    questionTemplate: 'Is {number} even or odd?',
+    variables: {
+      number: { min: 10, max: 99, step: 1 },
+    },
+    answerFormula: 'number % 2 === 0 ? "even" : "odd"',
+    wrongAnswerFormulas: [
+      'number % 2 === 0 ? "odd" : "even"',
+      '"even"',
+      '"odd"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Look at the last digit of {number}' },
+      { step: '2', detail: 'If it ends in 0, 2, 4, 6, or 8, it\'s even' },
+      { step: '3', detail: 'If it ends in 1, 3, 5, 7, or 9, it\'s odd' },
+      { step: '4', detail: 'Answer: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'multiples-5-easy',
+    category: 'Number Properties',
+    topic: 'Multiples',
+    difficulty: 'Easy',
+    questionTemplate: 'Is {number} a multiple of 5?',
+    variables: {
+      number: { min: 10, max: 100, step: 5 },
+    },
+    answerFormula: 'number % 5 === 0 ? "yes" : "no"',
+    wrongAnswerFormulas: [
+      'number % 5 === 0 ? "no" : "yes"',
+      '"yes"',
+      '"no"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Multiples of 5 end in 0 or 5' },
+      { step: '2', detail: 'Check the last digit of {number}' },
+      { step: '3', detail: 'Answer: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'multiples-10-medium',
+    category: 'Number Properties',
+    topic: 'Multiples',
+    difficulty: 'Medium',
+    questionTemplate: 'Is {number} a multiple of 10?',
+    variables: {
+      number: { min: 10, max: 200, step: 10 },
+    },
+    answerFormula: 'number % 10 === 0 ? "yes" : "no"',
+    wrongAnswerFormulas: [
+      'number % 10 === 0 ? "no" : "yes"',
+      '"yes"',
+      '"no"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Multiples of 10 end in 0' },
+      { step: '2', detail: 'Check the last digit of {number}' },
+      { step: '3', detail: 'Answer: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 30
+  },
+  {
+    id: 'multiples-50-hard',
+    category: 'Number Properties',
+    topic: 'Multiples',
+    difficulty: 'Hard',
+    questionTemplate: 'Is {number} a multiple of 50?',
+    variables: {
+      number: { min: 50, max: 500, step: 50 },
+    },
+    answerFormula: 'number % 50 === 0 ? "yes" : "no"',
+    wrongAnswerFormulas: [
+      'number % 50 === 0 ? "no" : "yes"',
+      '"yes"',
+      '"no"',
+    ],
+    methodStepsTemplate: [
+      { step: '1', detail: 'Multiples of 50 end in 00 or 50' },
+      { step: '2', detail: 'Check the last two digits of {number}' },
+      { step: '3', detail: 'Answer: {answer}' },
+    ],
+    questionType: 'mcq',
+    estimatedTimeSeconds: 45
+  },
+];
+
 /**
  * Get all templates
  */
@@ -1199,7 +1825,13 @@ export function getAllTemplates(): QuestionTemplate[] {
     ...divisionTemplates,
     ...subtractionTemplates,
     ...fractionsTemplates,
-    ...timeTemplates
+    ...timeTemplates,
+    ...moneyTemplates,
+    ...weightTemplates,
+    ...lengthTemplates,
+    ...capacityTemplates,
+    ...placeValueTemplates,
+    ...numberPropertiesTemplates,
   ];
 }
 

@@ -5,6 +5,7 @@ import { Question } from '@/types/question';
 import StepByStepExplanation from './StepByStepExplanation';
 import FractionShape from './FractionShape';
 import AnalogClock from './AnalogClock';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface QuizQuestionProps {
   question: Question;
@@ -21,6 +22,7 @@ export default function QuizQuestion({
   onAnswer,
   onNext,
 }: QuizQuestionProps) {
+  const { settings } = useSettings();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<{
@@ -28,11 +30,19 @@ export default function QuizQuestion({
     correctAnswer: string;
     methodSteps?: any[];
   } | null>(null);
-  const [timeLeft, setTimeLeft] = useState(question.estimatedTimeSeconds);
+  const [timeLeft, setTimeLeft] = useState(settings.timerEnabled ? settings.timerSeconds : 0);
+
+  // Reset state when question changes
+  useEffect(() => {
+    setTimeLeft(settings.timerEnabled ? settings.timerSeconds : 0);
+    setSelectedAnswer(null);
+    setSubmitted(false);
+    setResult(null);
+  }, [question.id, settings.timerEnabled, settings.timerSeconds]);
 
   // Countdown timer
   useEffect(() => {
-    if (submitted) return; // Stop timer when submitted
+    if (submitted || !settings.timerEnabled) return; // Stop timer when submitted or disabled
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -45,11 +55,11 @@ export default function QuizQuestion({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [submitted]);
+  }, [submitted, settings.timerEnabled]);
 
   // Auto-advance when time runs out
   useEffect(() => {
-    if (timeLeft === 0 && !submitted) {
+    if (timeLeft === 0 && !submitted && settings.timerEnabled) {
       // Time's up! Mark as wrong and move to next question
       setSubmitted(true);
       setResult({
@@ -63,15 +73,7 @@ export default function QuizQuestion({
         handleContinue();
       }, 3000);
     }
-  }, [timeLeft, submitted]);
-
-  // Reset timer when question changes
-  useEffect(() => {
-    setTimeLeft(question.estimatedTimeSeconds);
-    setSelectedAnswer(null);
-    setSubmitted(false);
-    setResult(null);
-  }, [question]);
+  }, [timeLeft, submitted, settings.timerEnabled]);
 
   const handleSelectAnswer = (answer: string) => {
     if (submitted) return;
@@ -87,21 +89,20 @@ export default function QuizQuestion({
       correctAnswer: question.correctAnswer,
       methodSteps: !isCorrect ? question.methodSteps : undefined,
     });
-
-    // Only auto-advance for CORRECT answers (after 2 seconds)
-    if (isCorrect) {
-      setTimeout(() => {
-        handleContinue();
-      }, 2000);
-    }
-    // For incorrect answers, user must click Continue button
   };
 
+  // Auto-advance for correct answers after 2 seconds
+  useEffect(() => {
+    if (result?.isCorrect && submitted) {
+      const timer = setTimeout(() => {
+        onNext();
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [result, submitted, onNext]);
+
   const handleContinue = () => {
-    setSelectedAnswer(null);
-    setSubmitted(false);
-    setResult(null);
-    setTimeLeft(question.estimatedTimeSeconds);
     onNext();
   };
 
@@ -147,14 +148,16 @@ export default function QuizQuestion({
           >
             {question.difficulty}
           </span>
-          <div className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-3xl ${
-            timeLeft <= 5 ? 'bg-red-100 text-red-600 animate-pulse' : 
-            timeLeft <= 10 ? 'bg-yellow-100 text-yellow-600' : 
-            'bg-blue-100 text-blue-600'
-          }`}>
-            <span>⏱️</span>
-            <span>{timeLeft}s</span>
-          </div>
+          {settings.timerEnabled && (
+            <div className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-3xl ${
+              timeLeft <= 5 ? 'bg-red-100 text-red-600 animate-pulse' : 
+              timeLeft <= 10 ? 'bg-yellow-100 text-yellow-600' : 
+              'bg-blue-100 text-blue-600'
+            }`}>
+              <span>⏱️</span>
+              <span>{timeLeft}s</span>
+            </div>
+          )}
         </div>
 
         {/* Question Text */}
@@ -183,8 +186,8 @@ export default function QuizQuestion({
           </div>
         )}
 
-        {/* Options */}
-        <div className="space-y-3 mb-6">
+        {/* Options - Two Column Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
           {question.options.map((option, index) => {
             const isSelected = selectedAnswer === option;
             const isCorrect = option === question.correctAnswer;
@@ -196,7 +199,7 @@ export default function QuizQuestion({
                 key={index}
                 onClick={() => handleSelectAnswer(option)}
                 disabled={submitted}
-                className={`w-full p-5 rounded-xl text-left font-medium text-lg transition-all duration-200 border-2 ${
+                className={`p-5 rounded-xl text-left font-medium text-lg transition-all duration-200 border-2 ${
                   showCorrect
                     ? 'bg-green-100 border-green-500 text-green-800'
                     : showIncorrect
@@ -227,8 +230,11 @@ export default function QuizQuestion({
                     Excellent Work!
                   </h3>
                 </div>
-                <p className="text-green-700">
+                <p className="text-green-700 mb-2">
                   You got it right! Keep up the great work!
+                </p>
+                <p className="text-center text-sm text-gray-600 italic">
+                  Next question in 2 seconds...
                 </p>
               </div>
             ) : (

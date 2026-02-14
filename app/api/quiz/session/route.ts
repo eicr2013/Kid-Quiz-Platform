@@ -2,67 +2,105 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Question } from '@/types/question';
 import { getAllTemplates, getTemplatesByCategory } from '@/lib/question-templates';
+import { getScienceTemplates } from '@/lib/science-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/quiz/session?categories=Category1,Category2
+ * GET /api/quiz/session?categories=Category1,Category2&subject=Mathematics
  * Fetches a new quiz session with 10 random questions
  * Uses dynamic templates for Addition, Subtraction, Multiplication, Division, Fractions, Units of Time
  * Ensures balanced difficulty distribution
- * Optional: Filter by categories (comma-separated)
+ * Optional: Filter by categories (comma-separated) and subject
  */
 export async function GET(request: Request) {
   try {
-    // Get categories from query parameters
+    // Get categories and subject from query parameters
     const { searchParams } = new URL(request.url);
     const categoriesParam = searchParams.get('categories');
+    const subject = searchParams.get('subject') || 'Mathematics';
     const selectedCategories = categoriesParam ? categoriesParam.split(',').map(c => c.trim()) : null;
 
-    // Categories that use dynamic templates
-    const dynamicCategories = ['Addition', 'Subtraction', 'Multiplication', 'Division', 'Fractions', 'Units of Time'];
+    // Get the appropriate templates based on subject
+    const allTemplates = subject === 'Science' ? getScienceTemplates() : getAllTemplates();
+    
+    // For Science, all categories use templates
+    // For Mathematics, check which categories use dynamic templates
+    const dynamicCategories = subject === 'Science' 
+      ? Array.from(new Set(allTemplates.map(t => t.category)))
+      : [
+          'Addition', 
+          'Subtraction', 
+          'Multiplication', 
+          'Division', 
+          'Fractions', 
+          'Units of Time',
+          'Money',
+          'Measurement - Weight',
+          'Measurement - Length',
+          'Measurement - Capacity',
+          'Place Value',
+          'Number Properties'
+        ];
     
     // Check if we should use templates for any selected categories
     const useDynamicForCategories = selectedCategories?.filter(cat => 
       dynamicCategories.includes(cat)
     ) || [];
     
-    const useStaticForCategories = selectedCategories?.filter(cat => 
-      !dynamicCategories.includes(cat)
-    ) || [];
+    const useStaticForCategories = subject === 'Science' 
+      ? []
+      : selectedCategories?.filter(cat => !dynamicCategories.includes(cat)) || [];
 
     let allQuestions: Question[] = [];
 
     // Generate questions from templates for dynamic categories
     if (useDynamicForCategories.length > 0) {
-      const templates = getAllTemplates().filter(t => 
+      const templates = allTemplates.filter(t => 
         useDynamicForCategories.includes(t.category)
       );
 
-      // Generate questions: 4 Easy, 4 Medium, 2 Hard
+      // Separate by difficulty
       const easyTemplates = templates.filter(t => t.difficulty === 'Easy');
       const mediumTemplates = templates.filter(t => t.difficulty === 'Medium');
       const hardTemplates = templates.filter(t => t.difficulty === 'Hard');
 
-      // Generate random questions from templates
-      for (let i = 0; i < 4; i++) {
-        if (easyTemplates.length > 0) {
-          const template = easyTemplates[Math.floor(Math.random() * easyTemplates.length)];
+      // For Science (static templates), use all available questions
+      // For Math (dynamic templates), generate 4-4-2 distribution
+      const isStaticTemplate = subject === 'Science';
+      
+      if (isStaticTemplate) {
+        // Use all available templates (don't repeat since they're static exam questions)
+        easyTemplates.forEach(template => {
           allQuestions.push(generateQuestionFromTemplate(template));
+        });
+        mediumTemplates.forEach(template => {
+          allQuestions.push(generateQuestionFromTemplate(template));
+        });
+        hardTemplates.forEach(template => {
+          allQuestions.push(generateQuestionFromTemplate(template));
+        });
+      } else {
+        // Dynamic templates (Math) - generate 4 Easy, 4 Medium, 2 Hard with repetition allowed
+        for (let i = 0; i < 4; i++) {
+          if (easyTemplates.length > 0) {
+            const template = easyTemplates[Math.floor(Math.random() * easyTemplates.length)];
+            allQuestions.push(generateQuestionFromTemplate(template));
+          }
         }
-      }
-      for (let i = 0; i < 4; i++) {
-        if (mediumTemplates.length > 0) {
-          const template = mediumTemplates[Math.floor(Math.random() * mediumTemplates.length)];
-          allQuestions.push(generateQuestionFromTemplate(template));
+        for (let i = 0; i < 4; i++) {
+          if (mediumTemplates.length > 0) {
+            const template = mediumTemplates[Math.floor(Math.random() * mediumTemplates.length)];
+            allQuestions.push(generateQuestionFromTemplate(template));
+          }
         }
-      }
-      for (let i = 0; i < 2; i++) {
-        if (hardTemplates.length > 0) {
-          const template = hardTemplates[Math.floor(Math.random() * hardTemplates.length)];
-          allQuestions.push(generateQuestionFromTemplate(template));
+        for (let i = 0; i < 2; i++) {
+          if (hardTemplates.length > 0) {
+            const template = hardTemplates[Math.floor(Math.random() * hardTemplates.length)];
+            allQuestions.push(generateQuestionFromTemplate(template));
+          }
         }
       }
     }

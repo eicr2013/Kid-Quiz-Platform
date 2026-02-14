@@ -1,16 +1,22 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getAllTemplates } from '@/lib/question-templates';
+import { getScienceTemplates } from '@/lib/science-templates';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/quiz/categories
+ * GET /api/quiz/categories?subject=Mathematics
  * Returns list of main categories with question counts
+ * Includes both database questions and template-based categories
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Get all questions with their categories
+    // Get subject from query parameters
+    const { searchParams } = new URL(request.url);
+    const subject = searchParams.get('subject') || 'Mathematics';
+    // Get all questions with their categories from database
     const { data: questions, error } = await supabase
       .from('questions')
       .select('category');
@@ -21,9 +27,8 @@ export async function GET() {
     }
 
     console.log('Fetched questions:', questions?.length);
-    console.log('Sample categories:', questions?.slice(0, 3));
 
-    // Count questions per category, filtering out null/undefined
+    // Count questions per category from database
     const categoryCounts = questions?.reduce((acc: Record<string, number>, { category }) => {
       // Skip null or undefined categories
       if (category && category !== 'null' && category !== 'undefined') {
@@ -32,7 +37,38 @@ export async function GET() {
       return acc;
     }, {}) || {};
 
-    console.log('Category counts:', categoryCounts);
+    // Get categories from templates based on subject
+    const templates = subject === 'Science' ? getScienceTemplates() : getAllTemplates();
+    const templateCategories = new Set(templates.map(t => t.category));
+
+    // For Science, only use templates (no database questions)
+    // For Mathematics, combine database and template questions
+    if (subject === 'Science') {
+      // Count actual templates per category for Science (static templates, not dynamic)
+      const scienceCategories: Record<string, number> = {};
+      templates.forEach(template => {
+        scienceCategories[template.category] = (scienceCategories[template.category] || 0) + 1;
+      });
+      
+      const categories = Object.entries(scienceCategories)
+        .map(([category, count]) => ({
+          category,
+          questionCount: count
+        }))
+        .sort((a, b) => a.category.localeCompare(b.category));
+
+      return NextResponse.json({ categories });
+    }
+
+    // For Mathematics: Add template-based categories
+    templateCategories.forEach(category => {
+      if (!categoryCounts[category]) {
+        // Mark as having infinite questions (we'll use 999 as a placeholder)
+        categoryCounts[category] = 999;
+      }
+    });
+
+    console.log('Category counts (including templates):', categoryCounts);
 
     // Convert to array with counts and sort
     const categories = Object.entries(categoryCounts)

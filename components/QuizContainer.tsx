@@ -4,8 +4,17 @@ import { useState } from 'react';
 import { Question } from '@/types/question';
 import QuizQuestion from './QuizQuestion';
 import CategorySelection from './CategorySelection';
+import SubjectSelection from './SubjectSelection';
+import SettingsModal from './SettingsModal';
+import LoginModal from './LoginModal';
+import ProgressReview from './ProgressReview';
+import AdminDashboard from './AdminDashboard';
+import { useUser } from '@/contexts/UserContext';
+import { useProgress } from '@/contexts/ProgressContext';
 
 export default function QuizContainer() {
+  const { user, login, logout } = useUser();
+  const { recordAnswer } = useProgress();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -15,18 +24,27 @@ export default function QuizContainer() {
   const [quizComplete, setQuizComplete] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   const startNewSession = async (categories?: string[]) => {
     try {
       setLoading(true);
       setError(null);
       
-      // Build URL with categories if provided
-      const categoriesQuery = categories && categories.length > 0 
-        ? `?categories=${categories.join(',')}` 
-        : '';
+      // Build URL with categories and subject if provided
+      const params = new URLSearchParams();
+      if (categories && categories.length > 0) {
+        params.append('categories', categories.join(','));
+      }
+      if (selectedSubject) {
+        params.append('subject', selectedSubject);
+      }
+      const queryString = params.toString() ? `?${params.toString()}` : '';
       
-      const response = await fetch(`/api/quiz/session${categoriesQuery}`);
+      const response = await fetch(`/api/quiz/session${queryString}`);
       if (!response.ok) {
         throw new Error('Failed to create quiz session');
       }
@@ -59,11 +77,39 @@ export default function QuizContainer() {
     setCurrentQuestionIndex(0);
   };
 
+  const handleBackToSubjects = () => {
+    setQuizStarted(false);
+    setQuizComplete(false);
+    setQuestions([]);
+    setAnswers(new Map());
+    setCurrentQuestionIndex(0);
+    setSelectedSubject(null);
+    setSelectedCategories([]);
+  };
+
+  const handlePracticeCategory = (category: string) => {
+    setShowProgress(false);
+    startNewSession([category]);
+  };
+
+  const handleSelectSubject = (subject: string) => {
+    // Allow Mathematics and Science, others coming soon
+    if (subject !== 'Mathematics' && subject !== 'Science') {
+      alert(`${subject} is coming soon! For now, please try Mathematics or Science. 🚀`);
+      return;
+    }
+    setSelectedSubject(subject);
+  };
+
   const handleAnswer = async (answer: string) => {
     if (!sessionId) return;
 
     const currentQuestion = questions[currentQuestionIndex];
     setAnswers(new Map(answers.set(currentQuestion.id!, answer)));
+
+    // Record answer in progress tracking
+    const isCorrect = answer === currentQuestion.correctAnswer;
+    recordAnswer(currentQuestion.category, isCorrect, selectedSubject || 'Mathematics');
 
     try {
       await fetch('/api/quiz/answer', {
@@ -102,9 +148,60 @@ export default function QuizContainer() {
     return { correct, total: questions.length };
   };
 
-  // Show category selection screen first
+  // Show login modal if no user
+  if (!user) {
+    return <LoginModal isOpen={true} onLogin={login} />;
+  }
+
+  // Show subject selection if no subject chosen
+  if (!selectedSubject) {
+    return (
+      <>
+        <SubjectSelection
+          onSelectSubject={handleSelectSubject}
+          userName={user.name}
+          onLogout={logout}
+          onOpenSettings={() => setShowSettings(true)}
+          onOpenProgress={() => setShowProgress(true)}
+          onOpenAdmin={() => setShowAdmin(true)}
+        />
+        <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+        <ProgressReview 
+          isOpen={showProgress} 
+          onClose={() => setShowProgress(false)}
+          onPracticeCategory={handlePracticeCategory}
+          subject={selectedSubject}
+        />
+        <AdminDashboard
+          isOpen={showAdmin}
+          onClose={() => setShowAdmin(false)}
+        />
+      </>
+    );
+  }
+
+  // Show category selection for selected subject
   if (!quizStarted) {
-    return <CategorySelection onStartQuiz={handleCategorySelection} />;
+    return (
+      <>
+        <CategorySelection 
+          onStartQuiz={handleCategorySelection} 
+          onOpenSettings={() => setShowSettings(true)}
+          onOpenProgress={() => setShowProgress(true)}
+          userName={user.name}
+          onLogout={logout}
+          onBackToSubjects={handleBackToSubjects}
+          subject={selectedSubject}
+        />
+        <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+        <ProgressReview 
+          isOpen={showProgress} 
+          onClose={() => setShowProgress(false)}
+          onPracticeCategory={handlePracticeCategory}
+          subject={selectedSubject}
+        />
+      </>
+    );
   }
 
   if (loading) {
@@ -121,13 +218,31 @@ export default function QuizContainer() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 relative">
-        {/* Main Menu Button */}
-        <button
-          onClick={handleRestartWithCategories}
-          className="fixed top-4 right-4 px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200 z-50"
-        >
-          🏠 Main Menu
-        </button>
+        {/* User Info */}
+        {user && (
+          <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-blue-300 z-50">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">👤</span>
+              <span className="font-bold text-gray-800">{user.name}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Top Right Buttons */}
+        <div className="fixed top-4 right-4 flex gap-2 z-50">
+          <button
+            onClick={handleRestartWithCategories}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+          >
+            📚 Change Topics
+          </button>
+          <button
+            onClick={handleBackToSubjects}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+          >
+            🏠 Home
+          </button>
+        </div>
         
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md">
           <div className="text-center">
@@ -154,13 +269,31 @@ export default function QuizContainer() {
 
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 relative">
-        {/* Main Menu Button */}
-        <button
-          onClick={handleRestartWithCategories}
-          className="fixed top-4 right-4 px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200 z-50"
-        >
-          🏠 Main Menu
-        </button>
+        {/* User Info */}
+        {user && (
+          <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-blue-300 z-50">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">👤</span>
+              <span className="font-bold text-gray-800">{user.name}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Top Right Buttons */}
+        <div className="fixed top-4 right-4 flex gap-2 z-50">
+          <button
+            onClick={handleRestartWithCategories}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+          >
+            📚 Change Topics
+          </button>
+          <button
+            onClick={handleBackToSubjects}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+          >
+            🏠 Home
+          </button>
+        </div>
         
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
           <div className="text-center">
@@ -215,18 +348,45 @@ export default function QuizContainer() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4 relative">
-      {/* Main Menu Button */}
-      <button
-        onClick={handleRestartWithCategories}
-        className="fixed top-4 right-4 px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200 z-50"
-      >
-        🏠 Main Menu
-      </button>
+      {/* User Info - Top Left */}
+      {user && (
+        <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-blue-300 z-50">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">👤</span>
+            <span className="font-bold text-gray-800">{user.name}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Top Right Buttons */}
+      <div className="fixed top-4 right-4 flex gap-2 z-50">
+        <button
+          onClick={() => setShowSettings(true)}
+          className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+        >
+          ⚙️ Settings
+        </button>
+        <button
+          onClick={handleRestartWithCategories}
+          className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+        >
+          📚 Change Topics
+        </button>
+        <button
+          onClick={handleBackToSubjects}
+          className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+        >
+          🏠 Home
+        </button>
+      </div>
+      
+      {/* Settings Modal */}
+      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
       
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
-            Math Quiz Challenge! 🎯
+            {selectedSubject === 'Science' ? '🔬 Science' : '🔢 Math'} Quiz Challenge! 🎯
           </h1>
           <p className="text-gray-600 text-lg mb-4">
             Answer each question carefully and learn as you go!

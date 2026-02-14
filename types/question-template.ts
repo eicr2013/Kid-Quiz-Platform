@@ -12,6 +12,7 @@ export interface VariableDefinition {
 
 /**
  * Question template for generating infinite variations
+ * Supports both dynamic (Math) and static (Science) templates
  */
 export interface QuestionTemplate {
   id: string;
@@ -22,25 +23,37 @@ export interface QuestionTemplate {
   // Template with placeholders like {num1}, {num2}
   questionTemplate: string;
   
-  // Variable definitions
-  variables: {
+  // ===== FOR DYNAMIC TEMPLATES (Math) =====
+  // Variable definitions (optional for static templates)
+  variables?: {
     [key: string]: VariableDefinition;
   };
   
-  // JavaScript expression to calculate answer
+  // JavaScript expression to calculate answer (optional for static templates)
   // Can use variable names: "num1 + num2", "100 - num1", etc.
-  answerFormula: string;
+  answerFormula?: string;
   
   // Optional: formulas for generating wrong answers
   // If not provided, will generate random nearby values
   wrongAnswerFormulas?: string[];
   
-  // Method steps with variable placeholders
-  methodStepsTemplate: Array<{
+  // Method steps with variable placeholders (optional for static templates)
+  methodStepsTemplate?: Array<{
     step: string;
     detail: string;  // Can include {variable} placeholders
   }>;
   
+  // ===== FOR STATIC TEMPLATES (Science) =====
+  // Direct answer value (for static templates that don't need calculation)
+  correctAnswerFormula?: string;
+  
+  // Direct wrong answers (for static templates)
+  wrongAnswers?: string[];
+  
+  // Simple method steps (for static templates)
+  methodSteps?: string[];
+  
+  // ===== COMMON FIELDS =====
   // Optional: image configuration
   imageConfig?: {
     type: 'fraction-shape' | 'clock';
@@ -53,8 +66,8 @@ export interface QuestionTemplate {
     shape?: 'circle' | 'rectangle';  // Fixed shape type
   };
   
-  questionType: "mcq" | "short_answer";
-  estimatedTimeSeconds: number;
+  questionType?: "mcq" | "short_answer";
+  estimatedTimeSeconds?: number;
 }
 
 /**
