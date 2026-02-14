@@ -29,18 +29,18 @@ export default function QuizContainer() {
   const [showProgress, setShowProgress] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
 
-  const startNewSession = async (categories?: string[]) => {
+  const startNewSession = async (categories?: string[], subjectOverride?: string) => {
     try {
       setLoading(true);
       setError(null);
-      
+      const subjectToUse = subjectOverride ?? selectedSubject;
       // Build URL with categories and subject if provided
       const params = new URLSearchParams();
       if (categories && categories.length > 0) {
         params.append('categories', categories.join(','));
       }
-      if (selectedSubject) {
-        params.append('subject', selectedSubject);
+      if (subjectToUse) {
+        params.append('subject', subjectToUse);
       }
       const queryString = params.toString() ? `?${params.toString()}` : '';
       
@@ -57,6 +57,7 @@ export default function QuizContainer() {
       setQuizComplete(false);
       setQuizStarted(true);
       setSelectedCategories(categories || []);
+      if (subjectOverride) setSelectedSubject(subjectOverride);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load quiz. Please try again.');
       console.error(err);
@@ -87,9 +88,9 @@ export default function QuizContainer() {
     setSelectedCategories([]);
   };
 
-  const handlePracticeCategory = (category: string) => {
+  const handlePracticeCategory = (category: string, subject?: string) => {
     setShowProgress(false);
-    startNewSession([category]);
+    startNewSession([category], subject);
   };
 
   const handleSelectSubject = (subject: string) => {

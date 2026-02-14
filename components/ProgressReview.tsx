@@ -4,10 +4,19 @@ import { useState } from 'react';
 import { useProgress } from '@/contexts/ProgressContext';
 import { CategoryProgress } from '@/contexts/ProgressContext';
 
+const SUBJECT_EMOJIS: Record<string, string> = {
+  'Mathematics': '🔢',
+  'Science': '🔬',
+  'English': '📚',
+  'Sinhala': '🪷',
+  'Social Studies': '🌍',
+  'Buddhism': '☸️',
+};
+
 interface ProgressReviewProps {
   isOpen: boolean;
   onClose: () => void;
-  onPracticeCategory: (category: string) => void;
+  onPracticeCategory: (category: string, subject?: string) => void;
   subject?: string | null;
 }
 
@@ -41,7 +50,7 @@ export default function ProgressReview({ isOpen, onClose, onPracticeCategory, su
         <div className="sticky top-0 bg-white border-b-2 border-gray-200 p-6 rounded-t-2xl z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-bold text-gray-800">
-              📊 {currentSubject === 'Science' ? '🔬 Science' : currentSubject === 'Mathematics' ? '🔢 Mathematics' : 'My'} Progress
+              📊 {currentSubject ? `${SUBJECT_EMOJIS[currentSubject] || '📚'} ${currentSubject}` : 'My'} Progress
             </h2>
             <button
               onClick={onClose}
@@ -53,7 +62,7 @@ export default function ProgressReview({ isOpen, onClose, onPracticeCategory, su
           
           {/* Subject Filter - only show if not within a specific subject */}
           {!subject && (
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4">
               <button
                 onClick={() => setSelectedSubjectFilter(null)}
                 className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
@@ -64,26 +73,19 @@ export default function ProgressReview({ isOpen, onClose, onPracticeCategory, su
               >
                 All Subjects
               </button>
-              <button
-                onClick={() => setSelectedSubjectFilter('Mathematics')}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                  selectedSubjectFilter === 'Mathematics'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                🔢 Math
-              </button>
-              <button
-                onClick={() => setSelectedSubjectFilter('Science')}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                  selectedSubjectFilter === 'Science'
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                🔬 Science
-              </button>
+              {(['Mathematics', 'Science', 'English', 'Sinhala', 'Social Studies', 'Buddhism'] as const).map((subj) => (
+                <button
+                  key={subj}
+                  onClick={() => setSelectedSubjectFilter(subj)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    selectedSubjectFilter === subj
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {SUBJECT_EMOJIS[subj]} {subj === 'Mathematics' ? 'Math' : subj}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -128,7 +130,7 @@ export default function ProgressReview({ isOpen, onClose, onPracticeCategory, su
                             {getSuccessRate(cat)}%
                           </span>
                           <button
-                            onClick={() => onPracticeCategory(cat.category)}
+                            onClick={() => onPracticeCategory(cat.category, cat.subject)}
                             className="px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors"
                           >
                             Practice
@@ -197,7 +199,7 @@ export default function ProgressReview({ isOpen, onClose, onPracticeCategory, su
                             {cat.category}
                             {!currentSubject && (
                               <span className="ml-2 text-xs text-gray-500">
-                                ({cat.subject === 'Science' ? '🔬' : '🔢'})
+                                ({SUBJECT_EMOJIS[cat.subject] || '📚'})
                               </span>
                             )}
                           </h4>
