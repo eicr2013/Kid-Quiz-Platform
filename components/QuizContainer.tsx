@@ -93,9 +93,9 @@ export default function QuizContainer() {
   };
 
   const handleSelectSubject = (subject: string) => {
-    // Allow Mathematics and Science, others coming soon
-    if (subject !== 'Mathematics' && subject !== 'Science') {
-      alert(`${subject} is coming soon! For now, please try Mathematics or Science. 🚀`);
+    // Allow Mathematics, Science, and Social Studies; English coming soon
+    if (subject !== 'Mathematics' && subject !== 'Science' && subject !== 'Social Studies') {
+      alert(`${subject} is coming soon! For now, please try Mathematics, Science, or Social Studies. 🚀`);
       return;
     }
     setSelectedSubject(subject);

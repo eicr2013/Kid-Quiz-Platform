@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getAllTemplates } from '@/lib/question-templates';
 import { getScienceTemplates } from '@/lib/science-templates';
+import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -38,10 +39,14 @@ export async function GET(request: Request) {
     }, {}) || {};
 
     // Get categories from templates based on subject
-    const templates = subject === 'Science' ? getScienceTemplates() : getAllTemplates();
+    const templates = subject === 'Science'
+      ? getScienceTemplates()
+      : subject === 'Social Studies'
+        ? getSocialStudiesTemplates()
+        : getAllTemplates();
     const templateCategories = new Set(templates.map(t => t.category));
 
-    // For Science, only use templates (no database questions)
+    // For Science and Social Studies, only use templates (no database questions)
     // For Mathematics, combine database and template questions
     if (subject === 'Science') {
       // Count actual templates per category for Science (static templates, not dynamic)
@@ -57,6 +62,20 @@ export async function GET(request: Request) {
         }))
         .sort((a, b) => a.category.localeCompare(b.category));
 
+      return NextResponse.json({ categories });
+    }
+
+    if (subject === 'Social Studies') {
+      const socialStudiesCategories: Record<string, number> = {};
+      templates.forEach(template => {
+        socialStudiesCategories[template.category] = (socialStudiesCategories[template.category] || 0) + 1;
+      });
+      const categories = Object.entries(socialStudiesCategories)
+        .map(([category, count]) => ({
+          category,
+          questionCount: count
+        }))
+        .sort((a, b) => a.category.localeCompare(b.category));
       return NextResponse.json({ categories });
     }
 

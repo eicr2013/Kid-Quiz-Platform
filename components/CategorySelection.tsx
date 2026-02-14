@@ -43,7 +43,18 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   'Food Chains': '🦊',
   'Water Cycle': '💧',
   'Materials': '🧪',
-  'Forces': '⚡'
+  'Forces': '⚡',
+  // Social Studies
+  'Community': '🏘️',
+  'Family and Roles': '👨‍👩‍👧‍👦',
+  'Rules and Laws': '📜',
+  'Maps and Places': '🗺️',
+  'Culture and Festivals': '🎉',
+  'Citizenship': '🏛️',
+  'Environment': '🌳',
+  'Goods and Services': '🛒',
+  'History and Heritage': '🏛️',
+  'Transport': '🚌'
 };
 
 // Subject emoji mapping
@@ -62,7 +73,7 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [subject]);
 
   const fetchCategories = async () => {
     try {

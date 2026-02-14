@@ -1,4 +1,5 @@
 import { QuestionTemplate, GeneratedValues, GeneratedQuestion, VariableDefinition } from '@/types/question-template';
+import { SOCIAL_STUDIES_CATEGORIES } from './social-studies-templates';
 
 /**
  * Generate a random value based on variable definition
@@ -384,9 +385,12 @@ export function generateQuestionFromTemplate(template: QuestionTemplate): Genera
   }
   
   // Determine subject based on category or default
-  const subject = ['Rocks and Soils', 'Living Things', 'Animals', 'Plants', 'Human Body', 'Food Chains', 'Water Cycle', 'Materials', 'Forces'].includes(template.category)
+  const scienceCategories = ['Rocks and Soils', 'Living Things', 'Animals', 'Plants', 'Human Body', 'Food Chains', 'Water Cycle', 'Materials', 'Forces', 'Nutrition and Health', 'Forces and Motion'];
+  const subject = scienceCategories.includes(template.category)
     ? 'Science'
-    : 'Mathematics';
+    : (SOCIAL_STUDIES_CATEGORIES as readonly string[]).includes(template.category)
+      ? 'Social Studies'
+      : 'Mathematics';
   
   return {
     id: `${template.id}-${Date.now()}-${Math.random()}`,

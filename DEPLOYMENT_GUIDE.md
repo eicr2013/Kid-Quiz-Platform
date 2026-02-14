@@ -70,6 +70,15 @@ SUPABASE_SERVICE_ROLE_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXB
 
 3. Click **"Add"** for each one
 
+### Step 4b: Create progress table in Supabase (for admin cross-device)
+
+So the admin can see progress from all devices, create the progress table once:
+
+1. In [Supabase Dashboard](https://supabase.com/dashboard) → your project → **SQL Editor**
+2. Run the contents of `database/quiz_progress.sql` (creates `quiz_progress` and RLS policies)
+
+Without this table, progress still works per device (localStorage); the admin dashboard will only show data from the current device.
+
 ### Step 5: Deploy!
 
 1. Click **"Deploy"**

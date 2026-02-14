@@ -30,39 +30,57 @@ export function ProgressProvider({ children, userName }: { children: ReactNode; 
     categories: new Map(),
   });
 
-  // Load progress from localStorage on mount or when userName changes
+  // Load progress: first from API (cross-device), then merge with localStorage
   useEffect(() => {
     if (!userName) {
-      // Clear progress if no user is logged in
       setProgress({ categories: new Map() });
       return;
     }
 
     const storageKey = `quizProgress_${userName}`;
-    const savedProgress = localStorage.getItem(storageKey);
-    
-    if (savedProgress) {
+    const loadFromApi = async () => {
       try {
-        const parsed = JSON.parse(savedProgress);
-        // Convert the plain object back to Map and ensure subject field exists
-        const categoriesMap = new Map(
-          Object.entries(parsed.categories).map(([key, value]: [string, any]) => [
-            key,
-            {
-              ...value,
-              subject: value.subject || 'Mathematics', // Default to Mathematics for old data
-            },
-          ])
-        );
-        setProgress({ categories: categoriesMap });
-      } catch (error) {
-        console.error('Failed to parse saved progress:', error);
-        setProgress({ categories: new Map() }); // Reset on error
+        const res = await fetch(`/api/progress?userName=${encodeURIComponent(userName)}`);
+        if (!res.ok) throw new Error('API failed');
+        const { categories: apiCategories } = await res.json();
+        if (apiCategories && typeof apiCategories === 'object') {
+          const fromApi = new Map(
+            Object.entries(apiCategories).map(([key, value]: [string, any]) => [
+              key,
+              { ...value, subject: value.subject || 'Mathematics' },
+            ])
+          );
+          setProgress((prev) => {
+            const merged = new Map(prev.categories);
+            fromApi.forEach((v, k) => merged.set(k, v));
+            return { categories: merged };
+          });
+          return;
+        }
+      } catch (_) {
+        // Fall through to localStorage
       }
-    } else {
-      // No saved progress for this user - start fresh
-      setProgress({ categories: new Map() });
-    }
+
+      const savedProgress = localStorage.getItem(storageKey);
+      if (savedProgress) {
+        try {
+          const parsed = JSON.parse(savedProgress);
+          const categoriesMap = new Map(
+            Object.entries(parsed.categories || {}).map(([key, value]: [string, any]) => [
+              key,
+              { ...value, subject: value.subject || 'Mathematics' },
+            ])
+          );
+          setProgress({ categories: categoriesMap });
+        } catch {
+          setProgress({ categories: new Map() });
+        }
+      } else {
+        setProgress({ categories: new Map() });
+      }
+    };
+
+    loadFromApi();
   }, [userName]);
 
   const recordAnswer = (category: string, isCorrect: boolean, subject: string = 'Mathematics') => {
@@ -90,15 +108,25 @@ export function ProgressProvider({ children, userName }: { children: ReactNode; 
 
       newCategories.set(key, updated);
 
-      // Save to localStorage (user-specific)
       const storageKey = `quizProgress_${userName}`;
-      const toSave = {
-        categories: Object.fromEntries(newCategories),
-      };
+      const toSave = { categories: Object.fromEntries(newCategories) };
       localStorage.setItem(storageKey, JSON.stringify(toSave));
-
-      // Also save to admin's master list
       saveToAdminList(userName, updated);
+
+      // Sync to backend so admin and other devices see this progress
+      fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName,
+          subject,
+          category,
+          totalAttempted: updated.totalAttempted,
+          totalCorrect: updated.totalCorrect,
+          totalWrong: updated.totalWrong,
+          lastPracticed: updated.lastPracticed,
+        }),
+      }).catch(() => {});
 
       return { categories: newCategories };
     });

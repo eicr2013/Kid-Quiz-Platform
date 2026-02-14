@@ -25,7 +25,18 @@ export default function AdminDashboard({ isOpen, onClose }: AdminDashboardProps)
     }
   }, [isOpen]);
 
-  const loadAllProgress = () => {
+  const loadAllProgress = async () => {
+    try {
+      const res = await fetch('/api/admin/progress');
+      if (res.ok) {
+        const data = await res.json();
+        setAllUsersProgress(data);
+        return;
+      }
+    } catch (e) {
+      console.error('Failed to load admin progress from API:', e);
+    }
+    // Fallback: localStorage (same device only)
     try {
       const adminListKey = 'adminProgressList';
       const existingData = localStorage.getItem(adminListKey);

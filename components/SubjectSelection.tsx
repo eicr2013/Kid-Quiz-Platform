@@ -106,10 +106,10 @@ export default function SubjectSelection({
             ))}
           </div>
 
-          {/* Coming Soon Badges for non-Math subjects */}
+          {/* Note for subjects */}
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-500">
-              Science, English, and Social Studies coming soon! 🚀
+              Mathematics, Science, and Social Studies available now. English coming soon! 🚀
             </p>
           </div>
         </div>
