@@ -54,7 +54,30 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   'Environment': '🌳',
   'Goods and Services': '🛒',
   'History and Heritage': '🏛️',
-  'Transport': '🚌'
+  'Transport': '🚌',
+  // English
+  'Listening Comprehension': '👂',
+  'Grammar - Verbs': '📝',
+  'Grammar - Adjectives': '📝',
+  'Grammar - Pronouns': '📝',
+  'Grammar - Tenses': '📝',
+  'Grammar - Modals': '📝',
+  'Vocabulary - Opposites': '📖',
+  'Wh-questions': '❓',
+  'Prepositions': '📍',
+  'Comprehension': '📄',
+  // Sinhala (Comprehension already above)
+  'Letters and Sounds': '🔤',
+  'Vocabulary': '📖',
+  'Grammar': '📝',
+  'Word Meaning': '💬',
+  // Buddhism
+  'Buddha and His Life': '🙏',
+  'Temple and Worship': '🛕',
+  'Precepts and Morality': '📿',
+  'Buddhist History - Sri Lanka': '🇱🇰',
+  'Jataka Stories': '📖',
+  'Good Qualities': '💛',
 };
 
 // Subject emoji mapping
@@ -62,7 +85,9 @@ const SUBJECT_EMOJIS: Record<string, string> = {
   'Mathematics': '🔢',
   'Science': '🔬',
   'English': '📚',
-  'Social Studies': '🌍'
+  'Sinhala': '🪷',
+  'Social Studies': '🌍',
+  'Buddhism': '☸️',
 };
 
 export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenProgress, userName, onLogout, onBackToSubjects, subject }: CategorySelectionProps) {
@@ -145,7 +170,7 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-6 relative">
-      {/* Top Right Buttons */}
+      {/* Top Right Buttons - same location as quiz page */}
       <div className="fixed top-4 right-4 flex gap-2 z-50">
         {onOpenProgress && (
           <button
@@ -161,6 +186,14 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
             className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
           >
             ⚙️ Settings
+          </button>
+        )}
+        {onBackToSubjects && (
+          <button
+            onClick={onBackToSubjects}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
+          >
+            🏠 Home
           </button>
         )}
       </div>
@@ -185,19 +218,6 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
       
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-2xl p-8">
-          {/* Back to Subjects Button - Top */}
-          {onBackToSubjects && (
-            <div className="mb-6">
-              <button
-                onClick={onBackToSubjects}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 transition-colors border-2 border-purple-200"
-              >
-                <span>🏠</span>
-                <span>Back to Subjects</span>
-              </button>
-            </div>
-          )}
-          
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-purple-600 mb-2">

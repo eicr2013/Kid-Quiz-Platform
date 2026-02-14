@@ -4,6 +4,9 @@ import { Question } from '@/types/question';
 import { getAllTemplates, getTemplatesByCategory } from '@/lib/question-templates';
 import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
+import { getEnglishTemplates } from '@/lib/english-templates';
+import { getSinhalaTemplates } from '@/lib/sinhala-templates';
+import { getBuddhismTemplates } from '@/lib/buddhism-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
 // Force dynamic rendering for this API route
@@ -29,11 +32,17 @@ export async function GET(request: Request) {
       ? getScienceTemplates()
       : subject === 'Social Studies'
         ? getSocialStudiesTemplates()
-        : getAllTemplates();
+        : subject === 'English'
+          ? getEnglishTemplates()
+          : subject === 'Sinhala'
+            ? getSinhalaTemplates()
+            : subject === 'Buddhism'
+              ? getBuddhismTemplates()
+              : getAllTemplates();
     
-    // For Science and Social Studies, all categories use templates
+    // For Science, Social Studies, and English, all categories use templates
     // For Mathematics, check which categories use dynamic templates
-    const dynamicCategories = subject === 'Science' || subject === 'Social Studies'
+    const dynamicCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Sinhala' || subject === 'Buddhism'
       ? Array.from(new Set(allTemplates.map(t => t.category)))
       : [
           'Addition', 
@@ -55,7 +64,7 @@ export async function GET(request: Request) {
       dynamicCategories.includes(cat)
     ) || [];
     
-    const useStaticForCategories = subject === 'Science' || subject === 'Social Studies'
+    const useStaticForCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Sinhala' || subject === 'Buddhism'
       ? []
       : selectedCategories?.filter(cat => !dynamicCategories.includes(cat)) || [];
 
@@ -72,9 +81,9 @@ export async function GET(request: Request) {
       const mediumTemplates = templates.filter(t => t.difficulty === 'Medium');
       const hardTemplates = templates.filter(t => t.difficulty === 'Hard');
 
-      // For Science and Social Studies (static templates), use all available questions
+      // For Science, Social Studies, and English (static templates), use all available questions
       // For Math (dynamic templates), generate 4-4-2 distribution
-      const isStaticTemplate = subject === 'Science' || subject === 'Social Studies';
+      const isStaticTemplate = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Sinhala' || subject === 'Buddhism';
       
       if (isStaticTemplate) {
         // Use all available templates (don't repeat since they're static exam questions)
@@ -169,21 +178,22 @@ export async function GET(request: Request) {
       }
     }
 
-    // Ensure we have enough questions
-    if (allQuestions.length < 10) {
+    // Require at least one question; allow quizzes with fewer than 10
+    if (allQuestions.length === 0) {
       return NextResponse.json(
-        { error: 'Insufficient questions available for selected categories' },
-        { status: 500 }
+        { error: 'No questions available for the selected categories. Try selecting more categories or a different subject.' },
+        { status: 400 }
       );
     }
 
-    // Shuffle and take 10 questions
-    const shuffledQuestions = shuffleArray(allQuestions).slice(0, 10);
+    // Shuffle and take up to 10 questions (or all if fewer)
+    const totalToTake = Math.min(10, allQuestions.length);
+    const shuffledQuestions = shuffleArray(allQuestions).slice(0, totalToTake);
 
     return NextResponse.json({
       sessionId: `session-${Date.now()}`,
       questions: shuffledQuestions,
-      totalQuestions: 10,
+      totalQuestions: shuffledQuestions.length,
     });
   } catch (error) {
     console.error('Error creating quiz session:', error);

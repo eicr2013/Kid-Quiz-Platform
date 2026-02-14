@@ -1,5 +1,8 @@
 import { QuestionTemplate, GeneratedValues, GeneratedQuestion, VariableDefinition } from '@/types/question-template';
 import { SOCIAL_STUDIES_CATEGORIES } from './social-studies-templates';
+import { ENGLISH_CATEGORIES } from './english-templates';
+import { SINHALA_CATEGORIES } from './sinhala-templates';
+import { BUDDHISM_CATEGORIES } from './buddhism-templates';
 
 /**
  * Generate a random value based on variable definition
@@ -390,7 +393,13 @@ export function generateQuestionFromTemplate(template: QuestionTemplate): Genera
     ? 'Science'
     : (SOCIAL_STUDIES_CATEGORIES as readonly string[]).includes(template.category)
       ? 'Social Studies'
-      : 'Mathematics';
+      : (ENGLISH_CATEGORIES as readonly string[]).includes(template.category)
+        ? 'English'
+        : (SINHALA_CATEGORIES as readonly string[]).includes(template.category)
+          ? 'Sinhala'
+          : (BUDDHISM_CATEGORIES as readonly string[]).includes(template.category)
+            ? 'Buddhism'
+            : 'Mathematics';
   
   return {
     id: `${template.id}-${Date.now()}-${Math.random()}`,

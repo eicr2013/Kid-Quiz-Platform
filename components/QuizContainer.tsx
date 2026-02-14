@@ -45,11 +45,11 @@ export default function QuizContainer() {
       const queryString = params.toString() ? `?${params.toString()}` : '';
       
       const response = await fetch(`/api/quiz/session${queryString}`);
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error('Failed to create quiz session');
+        throw new Error(data?.error || 'Failed to create quiz session');
       }
 
-      const data = await response.json();
       setQuestions(data.questions);
       setSessionId(data.sessionId);
       setCurrentQuestionIndex(0);
@@ -58,7 +58,7 @@ export default function QuizContainer() {
       setQuizStarted(true);
       setSelectedCategories(categories || []);
     } catch (err) {
-      setError('Failed to load quiz. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to load quiz. Please try again.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -93,9 +93,8 @@ export default function QuizContainer() {
   };
 
   const handleSelectSubject = (subject: string) => {
-    // Allow Mathematics, Science, and Social Studies; English coming soon
-    if (subject !== 'Mathematics' && subject !== 'Science' && subject !== 'Social Studies') {
-      alert(`${subject} is coming soon! For now, please try Mathematics, Science, or Social Studies. 🚀`);
+    if (subject !== 'Mathematics' && subject !== 'Science' && subject !== 'Social Studies' && subject !== 'English' && subject !== 'Sinhala' && subject !== 'Buddhism') {
+      alert(`${subject} is coming soon! For now, please try Mathematics, Science, English, Sinhala, Social Studies, or Buddhism. 🚀`);
       return;
     }
     setSelectedSubject(subject);
@@ -386,7 +385,7 @@ export default function QuizContainer() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
-            {selectedSubject === 'Science' ? '🔬 Science' : '🔢 Math'} Quiz Challenge! 🎯
+            {selectedSubject === 'Science' ? '🔬 Science' : selectedSubject === 'English' ? '📚 English' : selectedSubject === 'Sinhala' ? '🪷 Sinhala' : selectedSubject === 'Social Studies' ? '🌍 Social Studies' : selectedSubject === 'Buddhism' ? '☸️ Buddhism' : '🔢 Math'} Quiz Challenge! 🎯
           </h1>
           <p className="text-gray-600 text-lg mb-4">
             Answer each question carefully and learn as you go!

@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase';
 import { getAllTemplates } from '@/lib/question-templates';
 import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
+import { getEnglishTemplates } from '@/lib/english-templates';
+import { getSinhalaTemplates } from '@/lib/sinhala-templates';
+import { getBuddhismTemplates } from '@/lib/buddhism-templates';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -43,7 +46,13 @@ export async function GET(request: Request) {
       ? getScienceTemplates()
       : subject === 'Social Studies'
         ? getSocialStudiesTemplates()
-        : getAllTemplates();
+        : subject === 'English'
+          ? getEnglishTemplates()
+          : subject === 'Sinhala'
+            ? getSinhalaTemplates()
+            : subject === 'Buddhism'
+              ? getBuddhismTemplates()
+              : getAllTemplates();
     const templateCategories = new Set(templates.map(t => t.category));
 
     // For Science and Social Studies, only use templates (no database questions)
@@ -71,6 +80,48 @@ export async function GET(request: Request) {
         socialStudiesCategories[template.category] = (socialStudiesCategories[template.category] || 0) + 1;
       });
       const categories = Object.entries(socialStudiesCategories)
+        .map(([category, count]) => ({
+          category,
+          questionCount: count
+        }))
+        .sort((a, b) => a.category.localeCompare(b.category));
+      return NextResponse.json({ categories });
+    }
+
+    if (subject === 'English') {
+      const englishCategories: Record<string, number> = {};
+      templates.forEach(template => {
+        englishCategories[template.category] = (englishCategories[template.category] || 0) + 1;
+      });
+      const categories = Object.entries(englishCategories)
+        .map(([category, count]) => ({
+          category,
+          questionCount: count
+        }))
+        .sort((a, b) => a.category.localeCompare(b.category));
+      return NextResponse.json({ categories });
+    }
+
+    if (subject === 'Sinhala') {
+      const sinhalaCategories: Record<string, number> = {};
+      templates.forEach(template => {
+        sinhalaCategories[template.category] = (sinhalaCategories[template.category] || 0) + 1;
+      });
+      const categories = Object.entries(sinhalaCategories)
+        .map(([category, count]) => ({
+          category,
+          questionCount: count
+        }))
+        .sort((a, b) => a.category.localeCompare(b.category));
+      return NextResponse.json({ categories });
+    }
+
+    if (subject === 'Buddhism') {
+      const buddhismCategories: Record<string, number> = {};
+      templates.forEach(template => {
+        buddhismCategories[template.category] = (buddhismCategories[template.category] || 0) + 1;
+      });
+      const categories = Object.entries(buddhismCategories)
         .map(([category, count]) => ({
           category,
           questionCount: count

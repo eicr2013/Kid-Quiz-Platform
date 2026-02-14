@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase';
 import { getAllTemplates } from '@/lib/question-templates';
 import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
+import { getEnglishTemplates } from '@/lib/english-templates';
+import { getSinhalaTemplates } from '@/lib/sinhala-templates';
+import { getBuddhismTemplates } from '@/lib/buddhism-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +26,7 @@ export type ReviewQuestion = {
 /**
  * GET /api/admin/questions?subject=Mathematics&category=Addition
  * Returns all questions for admin review. Optional category filters to subsection.
- * - subject: Mathematics | Science | Social Studies
+ * - subject: Mathematics | Science | Social Studies | English | Sinhala
  * - category: optional, e.g. "Addition" to see only that subsection
  */
 export async function GET(request: Request) {
@@ -59,6 +62,60 @@ export async function GET(request: Request) {
         const q = generateQuestionFromTemplate(t);
         questions.push({
           id: q.id || `ss-${t.id}`,
+          subject: q.subject,
+          category: q.category,
+          topic: q.topic,
+          difficulty: q.difficulty,
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          source: 'template',
+          templateId: t.id,
+        });
+      });
+    } else if (subject === 'English') {
+      let templates = getEnglishTemplates();
+      if (category) templates = templates.filter(t => t.category === category);
+      templates.forEach(t => {
+        const q = generateQuestionFromTemplate(t);
+        questions.push({
+          id: q.id || `eng-${t.id}`,
+          subject: q.subject,
+          category: q.category,
+          topic: q.topic,
+          difficulty: q.difficulty,
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          source: 'template',
+          templateId: t.id,
+        });
+      });
+    } else if (subject === 'Sinhala') {
+      let templates = getSinhalaTemplates();
+      if (category) templates = templates.filter(t => t.category === category);
+      templates.forEach(t => {
+        const q = generateQuestionFromTemplate(t);
+        questions.push({
+          id: q.id || `sin-${t.id}`,
+          subject: q.subject,
+          category: q.category,
+          topic: q.topic,
+          difficulty: q.difficulty,
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          source: 'template',
+          templateId: t.id,
+        });
+      });
+    } else if (subject === 'Buddhism') {
+      let templates = getBuddhismTemplates();
+      if (category) templates = templates.filter(t => t.category === category);
+      templates.forEach(t => {
+        const q = generateQuestionFromTemplate(t);
+        questions.push({
+          id: q.id || `bud-${t.id}`,
           subject: q.subject,
           category: q.category,
           topic: q.topic,
