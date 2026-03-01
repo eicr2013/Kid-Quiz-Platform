@@ -215,6 +215,19 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
             </p>
           </div>
 
+          {/* Start Quiz Button - Top (visible without scrolling) */}
+          <button
+            onClick={handleStartQuiz}
+            disabled={selectedCategories.length === 0}
+            className={`w-full py-4 px-8 rounded-lg font-bold text-xl transition-all mb-6 ${
+              selectedCategories.length === 0
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+            }`}
+          >
+            {selectedCategories.length === 0 ? 'Select Topics to Start' : 'Start Quiz! 🚀'}
+          </button>
+
           {/* Select All / Clear All Buttons */}
           <div className="flex gap-4 mb-6">
             <button
@@ -265,7 +278,7 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
             ))}
           </div>
 
-          {/* Start Quiz Button */}
+          {/* Start Quiz Button - Bottom */}
           <button
             onClick={handleStartQuiz}
             disabled={selectedCategories.length === 0}

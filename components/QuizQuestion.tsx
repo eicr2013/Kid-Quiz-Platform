@@ -222,6 +222,15 @@ export default function QuizQuestion({
         {/* Result Feedback */}
         {result && (
           <div className="mt-6">
+            {/* Next Question - Top (visible without scrolling) */}
+            <div className="mb-4">
+              <button
+                onClick={handleContinue}
+                className="w-full px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-lg hover:bg-green-600 transition-colors shadow-md"
+              >
+                Next Question →
+              </button>
+            </div>
             {result.isCorrect ? (
               <div className="bg-green-50 border-2 border-green-300 rounded-xl p-6">
                 <div className="flex items-center gap-3 mb-2">
