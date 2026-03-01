@@ -4,6 +4,7 @@ interface SubjectSelectionProps {
   onSelectSubject: (subject: string) => void;
   onOpenSettings: () => void;
   onOpenProgress: () => void;
+  onOpenDemo?: () => void;
 }
 
 const SUBJECTS = [
@@ -18,11 +19,20 @@ export default function SubjectSelection({
   onSelectSubject,
   onOpenSettings,
   onOpenProgress,
+  onOpenDemo,
 }: SubjectSelectionProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-6 relative">
       {/* Top Right Buttons */}
       <div className="fixed top-4 right-4 flex gap-2 z-50">
+        {onOpenDemo && (
+          <button
+            onClick={onOpenDemo}
+            className="px-4 py-2 bg-amber-400 text-gray-800 rounded-lg font-semibold hover:bg-amber-300 transition-colors shadow-lg border-2 border-amber-500"
+          >
+            🎬 Demo
+          </button>
+        )}
         <button
           onClick={onOpenProgress}
           className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"

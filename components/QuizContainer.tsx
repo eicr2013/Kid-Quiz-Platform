@@ -6,6 +6,7 @@ import QuizQuestion from './QuizQuestion';
 import CategorySelection from './CategorySelection';
 import SubjectSelection from './SubjectSelection';
 import SettingsModal from './SettingsModal';
+import DemoModal from './DemoModal';
 import ProgressReview from './ProgressReview';
 import { useUser } from '@/contexts/UserContext';
 import { useProgress } from '@/contexts/ProgressContext';
@@ -25,6 +26,7 @@ export default function QuizContainer() {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
 
   const startNewSession = async (categories?: string[], subjectOverride?: string) => {
     try {
@@ -162,7 +164,9 @@ export default function QuizContainer() {
           onSelectSubject={handleSelectSubject}
           onOpenSettings={() => setShowSettings(true)}
           onOpenProgress={() => setShowProgress(true)}
+          onOpenDemo={() => setShowDemo(true)}
         />
+        <DemoModal isOpen={showDemo} onClose={() => setShowDemo(false)} />
         <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
         <ProgressReview 
           isOpen={showProgress} 
@@ -178,15 +182,17 @@ export default function QuizContainer() {
   if (!quizStarted) {
     return (
       <>
-        <CategorySelection 
+<CategorySelection 
           onStartQuiz={handleCategorySelection} 
           onOpenSettings={() => setShowSettings(true)}
           onOpenProgress={() => setShowProgress(true)}
+          onOpenDemo={() => setShowDemo(true)}
           onBackToSubjects={handleBackToSubjects}
           subject={selectedSubject}
         />
+        <DemoModal isOpen={showDemo} onClose={() => setShowDemo(false)} />
         <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
-        <ProgressReview 
+        <ProgressReview
           isOpen={showProgress} 
           onClose={() => setShowProgress(false)}
           onPracticeCategory={handlePracticeCategory}

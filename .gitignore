@@ -39,6 +39,9 @@ next-env.d.ts
 # Exclude grade-specific content
 /GRADE 3/
 
+# Demo automation recordings (generated .webm)
+/scripts/recordings/
+
 # Papers organization script (local use only)
 organize_papers.py
 

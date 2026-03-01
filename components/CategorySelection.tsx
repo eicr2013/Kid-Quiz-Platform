@@ -11,6 +11,7 @@ interface CategorySelectionProps {
   onStartQuiz: (selectedCategories: string[]) => void;
   onOpenSettings?: () => void;
   onOpenProgress?: () => void;
+  onOpenDemo?: () => void;
   onBackToSubjects?: () => void;
   subject?: string | null;
 }
@@ -87,7 +88,7 @@ const SUBJECT_EMOJIS: Record<string, string> = {
   'Buddhism': '☸️',
 };
 
-export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenProgress, onBackToSubjects, subject }: CategorySelectionProps) {
+export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenProgress, onOpenDemo, onBackToSubjects, subject }: CategorySelectionProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -169,6 +170,14 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
     <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-6 relative">
       {/* Top Right Buttons - same location as quiz page */}
       <div className="fixed top-4 right-4 flex gap-2 z-50">
+        {onOpenDemo && (
+          <button
+            onClick={onOpenDemo}
+            className="px-4 py-2 bg-amber-400 text-gray-800 rounded-lg font-semibold hover:bg-amber-300 transition-colors shadow-lg border-2 border-amber-500"
+          >
+            🎬 Demo
+          </button>
+        )}
         {onOpenProgress && (
           <button
             onClick={onOpenProgress}
