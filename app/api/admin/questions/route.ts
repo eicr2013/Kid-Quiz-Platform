@@ -4,7 +4,6 @@ import { getAllTemplates } from '@/lib/question-templates';
 import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
 import { getEnglishTemplates } from '@/lib/english-templates';
-import { getSinhalaTemplates } from '@/lib/sinhala-templates';
 import { getBuddhismTemplates } from '@/lib/buddhism-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
@@ -80,24 +79,6 @@ export async function GET(request: Request) {
         const q = generateQuestionFromTemplate(t);
         questions.push({
           id: q.id || `eng-${t.id}`,
-          subject: q.subject,
-          category: q.category,
-          topic: q.topic,
-          difficulty: q.difficulty,
-          question: q.question,
-          options: q.options,
-          correctAnswer: q.correctAnswer,
-          source: 'template',
-          templateId: t.id,
-        });
-      });
-    } else if (subject === 'Sinhala') {
-      let templates = getSinhalaTemplates();
-      if (category) templates = templates.filter(t => t.category === category);
-      templates.forEach(t => {
-        const q = generateQuestionFromTemplate(t);
-        questions.push({
-          id: q.id || `sin-${t.id}`,
           subject: q.subject,
           category: q.category,
           topic: q.topic,

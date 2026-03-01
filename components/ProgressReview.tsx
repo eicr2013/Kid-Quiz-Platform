@@ -8,7 +8,6 @@ const SUBJECT_EMOJIS: Record<string, string> = {
   'Mathematics': '🔢',
   'Science': '🔬',
   'English': '📚',
-  'Sinhala': '🪷',
   'Social Studies': '🌍',
   'Buddhism': '☸️',
 };
@@ -73,7 +72,7 @@ export default function ProgressReview({ isOpen, onClose, onPracticeCategory, su
               >
                 All Subjects
               </button>
-              {(['Mathematics', 'Science', 'English', 'Sinhala', 'Social Studies', 'Buddhism'] as const).map((subj) => (
+              {(['Mathematics', 'Science', 'English', 'Social Studies', 'Buddhism'] as const).map((subj) => (
                 <button
                   key={subj}
                   onClick={() => setSelectedSubjectFilter(subj)}

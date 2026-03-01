@@ -2,59 +2,27 @@
 
 interface SubjectSelectionProps {
   onSelectSubject: (subject: string) => void;
-  userName: string;
-  onLogout: () => void;
   onOpenSettings: () => void;
   onOpenProgress: () => void;
-  onOpenAdmin?: () => void;
 }
 
 const SUBJECTS = [
   { name: 'Mathematics', emoji: '🔢', color: 'from-blue-500 to-purple-500' },
   { name: 'Science', emoji: '🔬', color: 'from-green-500 to-teal-500' },
   { name: 'English', emoji: '📚', color: 'from-pink-500 to-rose-500' },
-  { name: 'Sinhala', emoji: '🪷', color: 'from-amber-500 to-orange-500' },
   { name: 'Social Studies', emoji: '🌍', color: 'from-orange-500 to-yellow-500' },
   { name: 'Buddhism', emoji: '☸️', color: 'from-amber-600 to-yellow-600' },
 ];
 
 export default function SubjectSelection({
   onSelectSubject,
-  userName,
-  onLogout,
   onOpenSettings,
   onOpenProgress,
-  onOpenAdmin,
 }: SubjectSelectionProps) {
-  // Check if user is admin (teacher or admin)
-  const isAdmin = userName.toLowerCase() === 'admin' || userName.toLowerCase() === 'teacher';
-  
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-6 relative">
-      {/* User Info - Top Left */}
-      <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-purple-300 z-50">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">👤</span>
-          <span className="font-bold text-gray-800">{userName}</span>
-          <button
-            onClick={onLogout}
-            className="ml-2 text-xs text-red-600 hover:text-red-800 underline"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-
       {/* Top Right Buttons */}
       <div className="fixed top-4 right-4 flex gap-2 z-50">
-        {isAdmin && onOpenAdmin && (
-          <button
-            onClick={onOpenAdmin}
-            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-colors shadow-lg"
-          >
-            👨‍🏫 Admin
-          </button>
-        )}
         <button
           onClick={onOpenProgress}
           className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
@@ -108,12 +76,6 @@ export default function SubjectSelection({
             ))}
           </div>
 
-          {/* Note for subjects */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-500">
-              Mathematics, Science, and Social Studies available now. English coming soon! 🚀
-            </p>
-          </div>
         </div>
       </div>
     </div>

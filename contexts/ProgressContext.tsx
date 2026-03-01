@@ -30,7 +30,7 @@ export function ProgressProvider({ children, userName }: { children: ReactNode; 
     categories: new Map(),
   });
 
-  // Load progress: first from API (cross-device), then merge with localStorage
+  // Load progress from browser only (privacy: no server/database storage)
   useEffect(() => {
     if (!userName) {
       setProgress({ categories: new Map() });
@@ -38,49 +38,23 @@ export function ProgressProvider({ children, userName }: { children: ReactNode; 
     }
 
     const storageKey = `quizProgress_${userName}`;
-    const loadFromApi = async () => {
+    const savedProgress = localStorage.getItem(storageKey);
+    if (savedProgress) {
       try {
-        const res = await fetch(`/api/progress?userName=${encodeURIComponent(userName)}`);
-        if (!res.ok) throw new Error('API failed');
-        const { categories: apiCategories } = await res.json();
-        if (apiCategories && typeof apiCategories === 'object') {
-          const fromApi = new Map(
-            Object.entries(apiCategories).map(([key, value]: [string, any]) => [
-              key,
-              { ...value, subject: value.subject || 'Mathematics' },
-            ])
-          );
-          setProgress((prev) => {
-            const merged = new Map(prev.categories);
-            fromApi.forEach((v, k) => merged.set(k, v));
-            return { categories: merged };
-          });
-          return;
-        }
-      } catch (_) {
-        // Fall through to localStorage
-      }
-
-      const savedProgress = localStorage.getItem(storageKey);
-      if (savedProgress) {
-        try {
-          const parsed = JSON.parse(savedProgress);
-          const categoriesMap = new Map(
-            Object.entries(parsed.categories || {}).map(([key, value]: [string, any]) => [
-              key,
-              { ...value, subject: value.subject || 'Mathematics' },
-            ])
-          );
-          setProgress({ categories: categoriesMap });
-        } catch {
-          setProgress({ categories: new Map() });
-        }
-      } else {
+        const parsed = JSON.parse(savedProgress);
+        const categoriesMap = new Map(
+          Object.entries(parsed.categories || {}).map(([key, value]: [string, any]) => [
+            key,
+            { ...value, subject: value.subject || 'Mathematics' },
+          ])
+        );
+        setProgress({ categories: categoriesMap });
+      } catch {
         setProgress({ categories: new Map() });
       }
-    };
-
-    loadFromApi();
+    } else {
+      setProgress({ categories: new Map() });
+    }
   }, [userName]);
 
   const recordAnswer = (category: string, isCorrect: boolean, subject: string = 'Mathematics') => {
@@ -111,53 +85,10 @@ export function ProgressProvider({ children, userName }: { children: ReactNode; 
       const storageKey = `quizProgress_${userName}`;
       const toSave = { categories: Object.fromEntries(newCategories) };
       localStorage.setItem(storageKey, JSON.stringify(toSave));
-      saveToAdminList(userName, updated);
-
-      // Sync to backend so admin and other devices see this progress
-      fetch('/api/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userName,
-          subject,
-          category,
-          totalAttempted: updated.totalAttempted,
-          totalCorrect: updated.totalCorrect,
-          totalWrong: updated.totalWrong,
-          lastPracticed: updated.lastPracticed,
-        }),
-      }).catch(() => {});
+      // Progress is stored only in the browser; not sent to any server (privacy)
 
       return { categories: newCategories };
     });
-  };
-
-  // Helper function to save progress to admin's master list
-  const saveToAdminList = (userName: string, categoryProgress: CategoryProgress) => {
-    try {
-      const adminListKey = 'adminProgressList';
-      const existingData = localStorage.getItem(adminListKey);
-      const adminList = existingData ? JSON.parse(existingData) : {};
-      
-      // Initialize user's data if not exists
-      if (!adminList[userName]) {
-        adminList[userName] = {
-          userName,
-          lastActivity: new Date().toISOString(),
-          categories: {},
-        };
-      }
-      
-      // Update user's category progress
-      const key = `${categoryProgress.subject}:${categoryProgress.category}`;
-      adminList[userName].categories[key] = categoryProgress;
-      adminList[userName].lastActivity = new Date().toISOString();
-      
-      // Save back to localStorage
-      localStorage.setItem(adminListKey, JSON.stringify(adminList));
-    } catch (error) {
-      console.error('Failed to save to admin list:', error);
-    }
   };
 
   const getAllProgress = (subject?: string): CategoryProgress[] => {

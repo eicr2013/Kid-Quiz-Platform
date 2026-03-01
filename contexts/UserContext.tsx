@@ -18,21 +18,23 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 // Admin password - in production, this should be in environment variables
 const ADMIN_PASSWORD = 'admin123';
 
+const DEFAULT_USER_NAME = 'Student';
+
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  // Load user from localStorage on mount
+  // No login: use default user so app goes straight to the game
   useEffect(() => {
     const savedUser = localStorage.getItem('quizUser');
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
         setUser(userData);
-        // Mark user as active
-        addToActiveUsers(userData.name);
-      } catch (error) {
-        console.error('Failed to parse saved user:', error);
+      } catch {
+        setUser({ name: DEFAULT_USER_NAME, createdAt: new Date().toISOString() });
       }
+    } else {
+      setUser({ name: DEFAULT_USER_NAME, createdAt: new Date().toISOString() });
     }
   }, []);
 

@@ -11,8 +11,6 @@ interface CategorySelectionProps {
   onStartQuiz: (selectedCategories: string[]) => void;
   onOpenSettings?: () => void;
   onOpenProgress?: () => void;
-  userName?: string;
-  onLogout?: () => void;
   onBackToSubjects?: () => void;
   subject?: string | null;
 }
@@ -85,12 +83,11 @@ const SUBJECT_EMOJIS: Record<string, string> = {
   'Mathematics': '🔢',
   'Science': '🔬',
   'English': '📚',
-  'Sinhala': '🪷',
   'Social Studies': '🌍',
   'Buddhism': '☸️',
 };
 
-export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenProgress, userName, onLogout, onBackToSubjects, subject }: CategorySelectionProps) {
+export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenProgress, onBackToSubjects, subject }: CategorySelectionProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,24 +195,6 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
         )}
       </div>
 
-      {/* User Info - Top Left */}
-      {userName && (
-        <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-purple-300 z-50">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">👤</span>
-            <span className="font-bold text-gray-800">{userName}</span>
-            {onLogout && (
-              <button
-                onClick={onLogout}
-                className="ml-2 text-xs text-red-600 hover:text-red-800 underline"
-              >
-                Logout
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-      
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-2xl p-8">
           {/* Header */}

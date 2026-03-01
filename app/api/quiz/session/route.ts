@@ -5,7 +5,6 @@ import { getAllTemplates, getTemplatesByCategory } from '@/lib/question-template
 import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
 import { getEnglishTemplates } from '@/lib/english-templates';
-import { getSinhalaTemplates } from '@/lib/sinhala-templates';
 import { getBuddhismTemplates } from '@/lib/buddhism-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
@@ -34,15 +33,13 @@ export async function GET(request: Request) {
         ? getSocialStudiesTemplates()
         : subject === 'English'
           ? getEnglishTemplates()
-          : subject === 'Sinhala'
-            ? getSinhalaTemplates()
-            : subject === 'Buddhism'
+          : subject === 'Buddhism'
               ? getBuddhismTemplates()
               : getAllTemplates();
     
     // For Science, Social Studies, and English, all categories use templates
     // For Mathematics, check which categories use dynamic templates
-    const dynamicCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Sinhala' || subject === 'Buddhism'
+    const dynamicCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Buddhism'
       ? Array.from(new Set(allTemplates.map(t => t.category)))
       : [
           'Addition', 
@@ -64,7 +61,7 @@ export async function GET(request: Request) {
       dynamicCategories.includes(cat)
     ) || [];
     
-    const useStaticForCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Sinhala' || subject === 'Buddhism'
+    const useStaticForCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Buddhism'
       ? []
       : selectedCategories?.filter(cat => !dynamicCategories.includes(cat)) || [];
 
@@ -83,7 +80,7 @@ export async function GET(request: Request) {
 
       // For Science, Social Studies, and English (static templates), use all available questions
       // For Math (dynamic templates), generate 4-4-2 distribution
-      const isStaticTemplate = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Sinhala' || subject === 'Buddhism';
+      const isStaticTemplate = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Buddhism';
       
       if (isStaticTemplate) {
         // Use all available templates (don't repeat since they're static exam questions)

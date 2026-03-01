@@ -6,9 +6,7 @@ import QuizQuestion from './QuizQuestion';
 import CategorySelection from './CategorySelection';
 import SubjectSelection from './SubjectSelection';
 import SettingsModal from './SettingsModal';
-import LoginModal from './LoginModal';
 import ProgressReview from './ProgressReview';
-import AdminDashboard from './AdminDashboard';
 import { useUser } from '@/contexts/UserContext';
 import { useProgress } from '@/contexts/ProgressContext';
 
@@ -27,7 +25,6 @@ export default function QuizContainer() {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
-  const [showAdmin, setShowAdmin] = useState(false);
 
   const startNewSession = async (categories?: string[], subjectOverride?: string) => {
     try {
@@ -94,8 +91,8 @@ export default function QuizContainer() {
   };
 
   const handleSelectSubject = (subject: string) => {
-    if (subject !== 'Mathematics' && subject !== 'Science' && subject !== 'Social Studies' && subject !== 'English' && subject !== 'Sinhala' && subject !== 'Buddhism') {
-      alert(`${subject} is coming soon! For now, please try Mathematics, Science, English, Sinhala, Social Studies, or Buddhism. 🚀`);
+    if (subject !== 'Mathematics' && subject !== 'Science' && subject !== 'Social Studies' && subject !== 'English' && subject !== 'Buddhism') {
+      alert(`${subject} is coming soon! For now, please try Mathematics, Science, English, Social Studies, or Buddhism. 🚀`);
       return;
     }
     setSelectedSubject(subject);
@@ -148,22 +145,23 @@ export default function QuizContainer() {
     return { correct, total: questions.length };
   };
 
-  // Show login modal if no user
+  // Brief loading until default user is set (no login screen)
   if (!user) {
-    return <LoginModal isOpen={true} onLogin={login} />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
   }
 
-  // Show subject selection if no subject chosen
+  // Show subject selection (go straight to game)
   if (!selectedSubject) {
     return (
       <>
         <SubjectSelection
           onSelectSubject={handleSelectSubject}
-          userName={user.name}
-          onLogout={logout}
           onOpenSettings={() => setShowSettings(true)}
           onOpenProgress={() => setShowProgress(true)}
-          onOpenAdmin={() => setShowAdmin(true)}
         />
         <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
         <ProgressReview 
@@ -171,10 +169,6 @@ export default function QuizContainer() {
           onClose={() => setShowProgress(false)}
           onPracticeCategory={handlePracticeCategory}
           subject={selectedSubject}
-        />
-        <AdminDashboard
-          isOpen={showAdmin}
-          onClose={() => setShowAdmin(false)}
         />
       </>
     );
@@ -188,8 +182,6 @@ export default function QuizContainer() {
           onStartQuiz={handleCategorySelection} 
           onOpenSettings={() => setShowSettings(true)}
           onOpenProgress={() => setShowProgress(true)}
-          userName={user.name}
-          onLogout={logout}
           onBackToSubjects={handleBackToSubjects}
           subject={selectedSubject}
         />
@@ -218,16 +210,6 @@ export default function QuizContainer() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 relative">
-        {/* User Info */}
-        {user && (
-          <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-blue-300 z-50">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">👤</span>
-              <span className="font-bold text-gray-800">{user.name}</span>
-            </div>
-          </div>
-        )}
-
         {/* Top Right Buttons */}
         <div className="fixed top-4 right-4 flex gap-2 z-50">
           <button
@@ -269,16 +251,6 @@ export default function QuizContainer() {
 
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 relative">
-        {/* User Info */}
-        {user && (
-          <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-blue-300 z-50">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">👤</span>
-              <span className="font-bold text-gray-800">{user.name}</span>
-            </div>
-          </div>
-        )}
-
         {/* Top Right Buttons */}
         <div className="fixed top-4 right-4 flex gap-2 z-50">
           <button
@@ -348,16 +320,6 @@ export default function QuizContainer() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4 relative">
-      {/* User Info - Top Left */}
-      {user && (
-        <div className="fixed top-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg border-2 border-blue-300 z-50">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">👤</span>
-            <span className="font-bold text-gray-800">{user.name}</span>
-          </div>
-        </div>
-      )}
-
       {/* Top Right Buttons */}
       <div className="fixed top-4 right-4 flex gap-2 z-50">
         <button
@@ -386,7 +348,7 @@ export default function QuizContainer() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
-            {selectedSubject === 'Science' ? '🔬 Science' : selectedSubject === 'English' ? '📚 English' : selectedSubject === 'Sinhala' ? '🪷 Sinhala' : selectedSubject === 'Social Studies' ? '🌍 Social Studies' : selectedSubject === 'Buddhism' ? '☸️ Buddhism' : '🔢 Math'} Quiz Challenge! 🎯
+            {selectedSubject === 'Science' ? '🔬 Science' : selectedSubject === 'English' ? '📚 English' : selectedSubject === 'Social Studies' ? '🌍 Social Studies' : selectedSubject === 'Buddhism' ? '☸️ Buddhism' : '🔢 Math'} Quiz Challenge! 🎯
           </h1>
           <p className="text-gray-600 text-lg mb-4">
             Answer each question carefully and learn as you go!

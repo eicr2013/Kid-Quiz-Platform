@@ -1,7 +1,6 @@
 import { QuestionTemplate, GeneratedValues, GeneratedQuestion, VariableDefinition } from '@/types/question-template';
 import { SOCIAL_STUDIES_CATEGORIES } from './social-studies-templates';
 import { ENGLISH_CATEGORIES } from './english-templates';
-import { SINHALA_CATEGORIES } from './sinhala-templates';
 import { BUDDHISM_CATEGORIES } from './buddhism-templates';
 
 /**
@@ -81,8 +80,11 @@ function replacePlaceholders(text: string, values: GeneratedValues, answerStr?: 
     } else if (typeof values.length === 'number' && typeof values.width === 'number') {
       // Perimeter calculations: 2 * length + 2 * width
       total = 2 * values.length;
+    } else if (typeof values.hundreds === 'number' && typeof values.tens === 'number' && typeof values.units === 'number') {
+      // Place value build (e.g. "3 hundreds + 7 tens + 7 units"): total = hundreds × 100
+      total = values.hundreds * 100;
     } else if (typeof values.hundreds === 'number' && typeof values.tens === 'number') {
-      // Place value: tens * 10 + units (for rounding to 100)
+      // Place value rounding: tens * 10 + units (for round to nearest 100)
       total = values.tens * 10 + (typeof values.units === 'number' ? values.units : 0);
     } else if (typeof values.hours === 'number') {
       // Time: total minutes from hours
@@ -395,9 +397,7 @@ export function generateQuestionFromTemplate(template: QuestionTemplate): Genera
       ? 'Social Studies'
       : (ENGLISH_CATEGORIES as readonly string[]).includes(template.category)
         ? 'English'
-        : (SINHALA_CATEGORIES as readonly string[]).includes(template.category)
-          ? 'Sinhala'
-          : (BUDDHISM_CATEGORIES as readonly string[]).includes(template.category)
+        : (BUDDHISM_CATEGORIES as readonly string[]).includes(template.category)
             ? 'Buddhism'
             : 'Mathematics';
   
