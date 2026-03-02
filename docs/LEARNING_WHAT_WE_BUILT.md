@@ -170,11 +170,63 @@ flowchart TB
 
 ---
 
-## 9. Summary
+## 9. Load testing: how we test parallel usage
+
+We simulate many users hitting the app at once with a script so you can see how it behaves under load on your machine (or against a deployed URL).
+
+### What the script does
+
+- The script **`scripts/load-test-parallel.mjs`** runs in Node.js. For each "user" it sends two requests in order:
+  1. **GET** `/api/quiz/categories?subject=Mathematics` → fetch list of categories
+  2. **GET** `/api/quiz/session?categories=Addition,Subtraction&subject=Mathematics` → fetch 10 questions for a quiz
+- **One "user"** = one complete run of that sequence.
+- **N parallel users** = N such sequences started at the same time (`Promise.all`), so the server receives N concurrent flows.
+
+### How success is defined
+
+| Result | Meaning |
+|--------|--------|
+| **Success** | Categories returned HTTP 200 **and** session returned 200 with a non-empty `questions` array (or 200 with no questions still counts as success). |
+| **Failed** | Categories non-200 (e.g. 404, 500), or session non-200, or no questions when expected, or any network/error. |
+
+**Success rate** = (number of successful users) ÷ (number of parallel users).
+
+- Example: `Success (categories + session ok): 8/10` → success rate = **80%**.
+- Example: `Success: 10/10` → success rate = **100%**.
+
+### What the script prints
+
+| Output | What it means |
+|--------|----------------|
+| `Success (categories + session ok): X/N` | X of N simulated users got both requests successful. |
+| `Failed: M` | M users had at least one failure; up to 5 examples are shown (e.g. `categories 404` or `session 500`). |
+| `Throughput: R requests/s` | (N users × 2 requests) ÷ time in seconds; rough API calls per second. |
+
+Before the full run, the script does a **pre-check**: one GET to the categories URL. If that returns non-200, the script exits and tells you to ensure the app is running and the base URL is correct.
+
+### How to run it
+
+1. Start the app (e.g. `npm run dev`) and leave it running.
+2. In another terminal, from the project root:
+   - `node scripts/load-test-parallel.mjs` → 10 parallel users, default `http://localhost:3000`
+   - `node scripts/load-test-parallel.mjs 20` → 20 parallel users
+   - `node scripts/load-test-parallel.mjs 50 http://localhost:3001` → 50 users, custom base URL
+
+Success rate = **(Success count printed) ÷ (number of parallel users you passed)**.
+
+### Why this is "parallel usage" testing
+
+- Many requests are in flight at once, similar to many people using the app at the same time.
+- If you increase the number and the success rate drops or more failures appear, you are near the capacity of your setup (Node, Supabase, or machine).
+
+---
+
+## 10. Summary
 
 - **Macro:** Browser → Vercel (Next.js) → Supabase. Git holds code; Vercel deploys from Git.
 - **Micro:** Next.js = React (UI) + API routes (server). API routes talk to Supabase. TypeScript + Tailwind for code and styling.
 - **Why each:** Vercel = easy deploy; Supabase = DB without managing a server; Git = history and safe deploys; Next.js = one app for UI and API.
+- **Load testing:** `scripts/load-test-parallel.mjs` simulates N users each doing categories + session in parallel; success rate = (successful users) / N; throughput = total requests / time.
 - **Alternatives:** Different hosts (Netlify, Railway), different DBs (Firebase, PlanetScale), same idea: app in cloud, DB in cloud, code in Git.
 
 If you want to go deeper on one part (e.g. only Supabase, or only “from Git to Vercel”), say which and we can do a single-page “micro” doc for that.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Question } from '@/types/question';
 import QuizQuestion from './QuizQuestion';
 import CategorySelection from './CategorySelection';
@@ -10,10 +10,17 @@ import DemoModal from './DemoModal';
 import ProgressReview from './ProgressReview';
 import { useUser } from '@/contexts/UserContext';
 import { useProgress } from '@/contexts/ProgressContext';
+import { useSound } from '@/contexts/SoundContext';
 
 export default function QuizContainer() {
-  const { user, login, logout } = useUser();
+  const { user } = useUser();
   const { recordAnswer } = useProgress();
+  const {
+    playBackgroundMusic,
+    playClick,
+    playQuizComplete,
+    playEncouragement,
+  } = useSound();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -93,6 +100,7 @@ export default function QuizContainer() {
   };
 
   const handleSelectSubject = (subject: string) => {
+    playClick();
     if (subject !== 'Mathematics' && subject !== 'Science' && subject !== 'Social Studies' && subject !== 'English' && subject !== 'Buddhism') {
       alert(`${subject} is coming soon! For now, please try Mathematics, Science, English, Social Studies, or Buddhism. 🚀`);
       return;
@@ -129,6 +137,7 @@ export default function QuizContainer() {
   };
 
   const handleNext = () => {
+    playClick();
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
@@ -147,6 +156,16 @@ export default function QuizContainer() {
     return { correct, total: questions.length };
   };
 
+  // Background music starts on first user click (browser autoplay rules)
+
+  // Play completion or encouragement when quiz ends
+  useEffect(() => {
+    if (!quizComplete || questions.length === 0) return;
+    const { correct } = calculateScore();
+    if (correct < 5) playEncouragement();
+    else playQuizComplete();
+  }, [quizComplete]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Brief loading until default user is set (no login screen)
   if (!user) {
     return (
@@ -162,9 +181,9 @@ export default function QuizContainer() {
       <>
         <SubjectSelection
           onSelectSubject={handleSelectSubject}
-          onOpenSettings={() => setShowSettings(true)}
-          onOpenProgress={() => setShowProgress(true)}
-          onOpenDemo={() => setShowDemo(true)}
+          onOpenSettings={() => { playClick(); setShowSettings(true); }}
+          onOpenProgress={() => { playClick(); setShowProgress(true); }}
+          onOpenDemo={() => { playClick(); setShowDemo(true); }}
         />
         <DemoModal isOpen={showDemo} onClose={() => setShowDemo(false)} />
         <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
@@ -183,11 +202,11 @@ export default function QuizContainer() {
     return (
       <>
 <CategorySelection 
-          onStartQuiz={handleCategorySelection} 
-          onOpenSettings={() => setShowSettings(true)}
-          onOpenProgress={() => setShowProgress(true)}
-          onOpenDemo={() => setShowDemo(true)}
-          onBackToSubjects={handleBackToSubjects}
+          onStartQuiz={(cats) => { playClick(); handleCategorySelection(cats); }}
+          onOpenSettings={() => { playClick(); setShowSettings(true); }}
+          onOpenProgress={() => { playClick(); setShowProgress(true); }}
+          onOpenDemo={() => { playClick(); setShowDemo(true); }}
+          onBackToSubjects={() => { playClick(); handleBackToSubjects(); }}
           subject={selectedSubject}
         />
         <DemoModal isOpen={showDemo} onClose={() => setShowDemo(false)} />
@@ -219,13 +238,13 @@ export default function QuizContainer() {
         {/* Top Right Buttons */}
         <div className="fixed top-4 right-4 flex gap-2 z-50">
           <button
-            onClick={handleRestartWithCategories}
+            onClick={() => { playClick(); handleRestartWithCategories(); }}
             className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
           >
             📚 Change Topics
           </button>
           <button
-            onClick={handleBackToSubjects}
+            onClick={() => { playClick(); handleBackToSubjects(); }}
             className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
           >
             🏠 Home
@@ -240,7 +259,7 @@ export default function QuizContainer() {
             </h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
-              onClick={handleRestartWithCategories}
+              onClick={() => { playClick(); handleRestartWithCategories(); }}
               className="px-6 py-3 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors"
             >
               Try Again
@@ -260,13 +279,13 @@ export default function QuizContainer() {
         {/* Top Right Buttons */}
         <div className="fixed top-4 right-4 flex gap-2 z-50">
           <button
-            onClick={handleRestartWithCategories}
+            onClick={() => { playClick(); handleRestartWithCategories(); }}
             className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
           >
             📚 Change Topics
           </button>
           <button
-            onClick={handleBackToSubjects}
+            onClick={() => { playClick(); handleBackToSubjects(); }}
             className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
           >
             🏠 Home
@@ -305,18 +324,18 @@ export default function QuizContainer() {
               )}
             </div>
             <div className="flex gap-4">
-              <button
-                onClick={() => startNewSession(selectedCategories)}
-                className="flex-1 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-bold text-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg"
-              >
-                Same Topics Again
-              </button>
-              <button
-                onClick={handleRestartWithCategories}
-                className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-bold text-lg hover:from-green-600 hover:to-teal-600 transition-all duration-200 shadow-lg"
-              >
-                Choose New Topics
-              </button>
+<button
+            onClick={() => { playClick(); startNewSession(selectedCategories); }}
+            className="flex-1 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-bold text-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg"
+          >
+            Same Topics Again
+          </button>
+          <button
+            onClick={() => { playClick(); handleRestartWithCategories(); }}
+            className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-bold text-lg hover:from-green-600 hover:to-teal-600 transition-all duration-200 shadow-lg"
+          >
+            Choose New Topics
+          </button>
             </div>
           </div>
         </div>
@@ -329,19 +348,19 @@ export default function QuizContainer() {
       {/* Top Right Buttons */}
       <div className="fixed top-4 right-4 flex gap-2 z-50">
         <button
-          onClick={() => setShowSettings(true)}
+          onClick={() => { playClick(); setShowSettings(true); }}
           className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
         >
           ⚙️ Settings
         </button>
         <button
-          onClick={handleRestartWithCategories}
+          onClick={() => { playClick(); handleRestartWithCategories(); }}
           className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
         >
           📚 Change Topics
         </button>
         <button
-          onClick={handleBackToSubjects}
+          onClick={() => { playClick(); handleBackToSubjects(); }}
           className="px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-gray-200"
         >
           🏠 Home

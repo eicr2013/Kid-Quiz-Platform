@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSound } from '@/contexts/SoundContext';
 
 interface Category {
   category: string;
@@ -89,6 +90,7 @@ const SUBJECT_EMOJIS: Record<string, string> = {
 };
 
 export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenProgress, onOpenDemo, onBackToSubjects, subject }: CategorySelectionProps) {
+  const { playClick } = useSound();
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,6 +121,7 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
   };
 
   const toggleCategory = (category: string) => {
+    playClick();
     setSelectedCategories(prev => 
       prev.includes(category)
         ? prev.filter(c => c !== category)
@@ -127,10 +130,12 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
   };
 
   const selectAll = () => {
+    playClick();
     setSelectedCategories(categories.map(c => c.category));
   };
 
   const clearAll = () => {
+    playClick();
     setSelectedCategories([]);
   };
 

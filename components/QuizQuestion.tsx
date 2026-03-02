@@ -6,6 +6,7 @@ import StepByStepExplanation from './StepByStepExplanation';
 import FractionShape from './FractionShape';
 import AnalogClock from './AnalogClock';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useSound } from '@/contexts/SoundContext';
 
 interface QuizQuestionProps {
   question: Question;
@@ -23,6 +24,7 @@ export default function QuizQuestion({
   onNext,
 }: QuizQuestionProps) {
   const { settings } = useSettings();
+  const { playClick } = useSound();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<{
@@ -77,7 +79,7 @@ export default function QuizQuestion({
 
   const handleSelectAnswer = (answer: string) => {
     if (submitted) return;
-    
+    playClick();
     setSelectedAnswer(answer);
     setSubmitted(true);
     onAnswer(answer);
