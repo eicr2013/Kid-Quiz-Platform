@@ -11,6 +11,15 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Kid Quiz – Practice, Learn & Enjoy',
   description: 'Practice Math, Science, English, and more. Learn at your own pace and enjoy quizzes for kids.',
+  openGraph: {
+    title: 'Kid Quiz – Practice, Learn & Enjoy',
+    description: 'Practice Math, Science, English, and more. Learn at your own pace and enjoy quizzes for kids.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Kid Quiz – Practice, Learn & Enjoy',
+    description: 'Practice Math, Science, English, and more. Learn at your own pace and enjoy quizzes for kids.',
+  },
 };
 
 export default function RootLayout({
