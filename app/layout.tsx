@@ -8,15 +8,28 @@ import ProgressWrapper from '@/components/ProgressWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
+const baseUrl =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: 'Kid Quiz – Practice, Learn & Enjoy',
   description: 'Practice Math, Science, English, and more. Learn at your own pace and enjoy quizzes for kids.',
   openGraph: {
     title: 'Kid Quiz – Practice, Learn & Enjoy',
     description: 'Practice Math, Science, English, and more. Learn at your own pace and enjoy quizzes for kids.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Kid Quiz – Practice, Learn & Enjoy',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Kid Quiz – Practice, Learn & Enjoy',
     description: 'Practice Math, Science, English, and more. Learn at your own pace and enjoy quizzes for kids.',
   },
