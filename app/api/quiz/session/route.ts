@@ -6,6 +6,8 @@ import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
 import { getEnglishTemplates } from '@/lib/english-templates';
 import { getBuddhismTemplates } from '@/lib/buddhism-templates';
+import { getComputingTemplates } from '@/lib/computing-templates';
+import { getHumanValuesTemplates } from '@/lib/human-values-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
 // Force dynamic rendering for this API route
@@ -35,11 +37,15 @@ export async function GET(request: Request) {
           ? getEnglishTemplates()
           : subject === 'Buddhism'
               ? getBuddhismTemplates()
-              : getAllTemplates();
+              : subject === 'Computing'
+                ? getComputingTemplates()
+                : subject === 'Education in Human Values'
+                  ? getHumanValuesTemplates()
+                  : getAllTemplates();
     
-    // For Science, Social Studies, and English, all categories use templates
+    // For Science, Social Studies, English, Buddhism, Computing, and Human Values, all categories use templates
     // For Mathematics, check which categories use dynamic templates
-    const dynamicCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Buddhism'
+    const dynamicCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Buddhism' || subject === 'Computing' || subject === 'Education in Human Values'
       ? Array.from(new Set(allTemplates.map(t => t.category)))
       : [
           'Addition', 

@@ -27,7 +27,7 @@ interface AdminDashboardProps {
   onClose: () => void;
 }
 
-const SUBJECTS = ['Mathematics', 'Science', 'English', 'Social Studies', 'Buddhism'] as const;
+const SUBJECTS = ['Mathematics', 'Science', 'English', 'Social Studies', 'Buddhism', 'Computing', 'Education in Human Values'] as const;
 
 export default function AdminDashboard({ isOpen, onClose }: AdminDashboardProps) {
   const [tab, setTab] = useState<'progress' | 'questions'>('progress');

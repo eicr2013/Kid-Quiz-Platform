@@ -5,6 +5,8 @@ import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
 import { getEnglishTemplates } from '@/lib/english-templates';
 import { getBuddhismTemplates } from '@/lib/buddhism-templates';
+import { getComputingTemplates } from '@/lib/computing-templates';
+import { getHumanValuesTemplates } from '@/lib/human-values-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
 export const dynamic = 'force-dynamic';
@@ -97,6 +99,42 @@ export async function GET(request: Request) {
         const q = generateQuestionFromTemplate(t);
         questions.push({
           id: q.id || `bud-${t.id}`,
+          subject: q.subject,
+          category: q.category,
+          topic: q.topic,
+          difficulty: q.difficulty,
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          source: 'template',
+          templateId: t.id,
+        });
+      });
+    } else if (subject === 'Computing') {
+      let templates = getComputingTemplates();
+      if (category) templates = templates.filter(t => t.category === category);
+      templates.forEach(t => {
+        const q = generateQuestionFromTemplate(t);
+        questions.push({
+          id: q.id || `comp-${t.id}`,
+          subject: q.subject,
+          category: q.category,
+          topic: q.topic,
+          difficulty: q.difficulty,
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          source: 'template',
+          templateId: t.id,
+        });
+      });
+    } else if (subject === 'Education in Human Values') {
+      let templates = getHumanValuesTemplates();
+      if (category) templates = templates.filter(t => t.category === category);
+      templates.forEach(t => {
+        const q = generateQuestionFromTemplate(t);
+        questions.push({
+          id: q.id || `ehv-${t.id}`,
           subject: q.subject,
           category: q.category,
           topic: q.topic,

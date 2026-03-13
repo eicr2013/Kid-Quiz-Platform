@@ -2,6 +2,8 @@ import { QuestionTemplate, GeneratedValues, GeneratedQuestion, VariableDefinitio
 import { SOCIAL_STUDIES_CATEGORIES } from './social-studies-templates';
 import { ENGLISH_CATEGORIES } from './english-templates';
 import { BUDDHISM_CATEGORIES } from './buddhism-templates';
+import { COMPUTING_CATEGORIES } from './computing-templates';
+import { HUMAN_VALUES_CATEGORIES } from './human-values-templates';
 
 /**
  * Generate a random value based on variable definition
@@ -399,7 +401,11 @@ export function generateQuestionFromTemplate(template: QuestionTemplate): Genera
         ? 'English'
         : (BUDDHISM_CATEGORIES as readonly string[]).includes(template.category)
             ? 'Buddhism'
-            : 'Mathematics';
+            : (COMPUTING_CATEGORIES as readonly string[]).includes(template.category)
+              ? 'Computing'
+              : (HUMAN_VALUES_CATEGORIES as readonly string[]).includes(template.category)
+                ? 'Education in Human Values'
+                : 'Mathematics';
   
   return {
     id: `${template.id}-${Date.now()}-${Math.random()}`,

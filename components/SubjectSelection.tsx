@@ -13,6 +13,8 @@ const SUBJECTS = [
   { name: 'English', emoji: '📚', color: 'from-pink-500 to-rose-500' },
   { name: 'Social Studies', emoji: '🌍', color: 'from-orange-500 to-yellow-500' },
   { name: 'Buddhism', emoji: '☸️', color: 'from-amber-600 to-yellow-600' },
+  { name: 'Computing', emoji: '💻', color: 'from-blue-600 to-cyan-500' },
+  { name: 'Education in Human Values', emoji: '💎', color: 'from-pink-600 to-rose-600' },
 ];
 
 export default function SubjectSelection({

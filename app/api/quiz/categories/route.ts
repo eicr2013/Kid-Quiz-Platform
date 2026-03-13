@@ -5,6 +5,8 @@ import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
 import { getEnglishTemplates } from '@/lib/english-templates';
 import { getBuddhismTemplates } from '@/lib/buddhism-templates';
+import { getComputingTemplates } from '@/lib/computing-templates';
+import { getHumanValuesTemplates } from '@/lib/human-values-templates';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -49,7 +51,11 @@ export async function GET(request: Request) {
           ? getEnglishTemplates()
           : subject === 'Buddhism'
               ? getBuddhismTemplates()
-              : getAllTemplates();
+              : subject === 'Computing'
+                ? getComputingTemplates()
+                : subject === 'Education in Human Values'
+                  ? getHumanValuesTemplates()
+                  : getAllTemplates();
     const templateCategories = new Set(templates.map(t => t.category));
 
     // For Science and Social Studies, only use templates (no database questions)
@@ -105,6 +111,34 @@ export async function GET(request: Request) {
         buddhismCategories[template.category] = (buddhismCategories[template.category] || 0) + 1;
       });
       const categories = Object.entries(buddhismCategories)
+        .map(([category, count]) => ({
+          category,
+          questionCount: count
+        }))
+        .sort((a, b) => a.category.localeCompare(b.category));
+      return NextResponse.json({ categories });
+    }
+
+    if (subject === 'Computing') {
+      const computingCategories: Record<string, number> = {};
+      templates.forEach(template => {
+        computingCategories[template.category] = (computingCategories[template.category] || 0) + 1;
+      });
+      const categories = Object.entries(computingCategories)
+        .map(([category, count]) => ({
+          category,
+          questionCount: count
+        }))
+        .sort((a, b) => a.category.localeCompare(b.category));
+      return NextResponse.json({ categories });
+    }
+
+    if (subject === 'Education in Human Values') {
+      const humanValuesCategories: Record<string, number> = {};
+      templates.forEach(template => {
+        humanValuesCategories[template.category] = (humanValuesCategories[template.category] || 0) + 1;
+      });
+      const categories = Object.entries(humanValuesCategories)
         .map(([category, count]) => ({
           category,
           questionCount: count

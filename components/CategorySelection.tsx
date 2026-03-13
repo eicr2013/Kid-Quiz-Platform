@@ -44,6 +44,31 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   'Water Cycle': '💧',
   'Materials': '🧪',
   'Forces': '⚡',
+  // Computing
+  'Internet and Web': '🌐',
+  'Internet Safety': '🔒',
+  'Storage Devices': '💾',
+  'Printers': '🖨️',
+  'Input Devices': '⌨️',
+  'File Management': '📁',
+  'Software Applications': '💿',
+  'Hardware': '🖥️',
+  // Education in Human Values
+  'Values of Love': '❤️',
+  'Respect': '🙏',
+  'Truth and Perseverance': '✨',
+  'Contentment': '😊',
+  'Kindness and Compassion': '🤗',
+  'Peace': '☮️',
+  'Patience': '⏳',
+  'Truth': '💯',
+  'Environmental Care': '🌍',
+  'Kindness to Animals': '🐾',
+  'Helping the Poor and Needy': '🤝',
+  'Anger Management': '😌',
+  'Respect for Teachers': '👨‍🏫',
+  'Understanding Values': '💡',
+  'Friendship': '👫',
   // Social Studies
   'Community': '🏘️',
   'Family and Roles': '👨‍👩‍👧‍👦',
@@ -87,6 +112,8 @@ const SUBJECT_EMOJIS: Record<string, string> = {
   'English': '📚',
   'Social Studies': '🌍',
   'Buddhism': '☸️',
+  'Computing': '💻',
+  'Education in Human Values': '💎',
 };
 
 export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenProgress, onOpenDemo, onBackToSubjects, subject }: CategorySelectionProps) {
