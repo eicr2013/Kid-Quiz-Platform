@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { getAllTemplates } from '@/lib/question-templates';
 import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
@@ -7,6 +6,7 @@ import { getEnglishTemplates } from '@/lib/english-templates';
 import { getBuddhismTemplates } from '@/lib/buddhism-templates';
 import { getComputingTemplates } from '@/lib/computing-templates';
 import { getHumanValuesTemplates } from '@/lib/human-values-templates';
+import { getMathPreviewTemplates } from '@/lib/math-preview-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
 export const dynamic = 'force-dynamic';
@@ -146,30 +146,26 @@ export async function GET(request: Request) {
           templateId: t.id,
         });
       });
-    } else {
-      // Mathematics: database questions + one sample per template
-      let dbQuery = supabase
-        .from('questions')
-        .select('id, subject, category, topic, difficulty, question, options, correct_answer, method_steps');
-      if (category) dbQuery = dbQuery.eq('category', category);
-      const { data: dbRows, error } = await dbQuery;
-
-      if (!error && dbRows?.length) {
-        dbRows.forEach((row: any) => {
-          questions.push({
-            id: row.id,
-            subject: row.subject || 'Mathematics',
-            category: row.category,
-            topic: row.topic,
-            difficulty: row.difficulty,
-            question: row.question,
-            options: typeof row.options === 'string' ? JSON.parse(row.options) : row.options || [],
-            correctAnswer: row.correct_answer,
-            source: 'database',
-          });
+    } else if (subject === 'Mathematics Preview') {
+      let templates = getMathPreviewTemplates();
+      if (category) templates = templates.filter(t => t.category === category);
+      templates.forEach(t => {
+        const q = generateQuestionFromTemplate(t);
+        questions.push({
+          id: q.id || `preview-${t.id}`,
+          subject: q.subject,
+          category: q.category,
+          topic: q.topic,
+          difficulty: q.difficulty,
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          source: 'template',
+          templateId: t.id,
         });
-      }
-
+      });
+    } else {
+      // Mathematics: only template-based questions
       let templates = getAllTemplates();
       if (category) templates = templates.filter(t => t.category === category);
       templates.forEach(t => {

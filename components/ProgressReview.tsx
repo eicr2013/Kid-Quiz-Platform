@@ -6,6 +6,7 @@ import { CategoryProgress } from '@/contexts/ProgressContext';
 
 const SUBJECT_EMOJIS: Record<string, string> = {
   'Mathematics': '🔢',
+  'Mathematics Preview': '🔬',
   'Science': '🔬',
   'English': '📚',
   'Social Studies': '🌍',
@@ -74,7 +75,7 @@ export default function ProgressReview({ isOpen, onClose, onPracticeCategory, su
               >
                 All Subjects
               </button>
-              {(['Mathematics', 'Science', 'English', 'Social Studies', 'Buddhism', 'Computing', 'Education in Human Values'] as const).map((subj) => (
+              {(['Mathematics', 'Mathematics Preview', 'Science', 'English', 'Social Studies', 'Buddhism', 'Computing', 'Education in Human Values'] as const).map((subj) => (
                 <button
                   key={subj}
                   onClick={() => setSelectedSubjectFilter(subj)}

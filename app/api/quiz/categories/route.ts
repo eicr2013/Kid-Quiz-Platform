@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { getAllTemplates } from '@/lib/question-templates';
 import { getScienceTemplates } from '@/lib/science-templates';
 import { getSocialStudiesTemplates } from '@/lib/social-studies-templates';
@@ -7,6 +6,7 @@ import { getEnglishTemplates } from '@/lib/english-templates';
 import { getBuddhismTemplates } from '@/lib/buddhism-templates';
 import { getComputingTemplates } from '@/lib/computing-templates';
 import { getHumanValuesTemplates } from '@/lib/human-values-templates';
+import { getMathPreviewTemplates } from '@/lib/math-preview-templates';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -21,26 +21,10 @@ export async function GET(request: Request) {
     // Get subject from query parameters
     const { searchParams } = new URL(request.url);
     const subject = searchParams.get('subject') || 'Mathematics';
-    // Get all questions with their categories from database
-    const { data: questions, error } = await supabase
-      .from('questions')
-      .select('category');
-
-    if (error) {
-      console.error('Supabase error:', error);
-      throw error;
-    }
-
-    console.log('Fetched questions:', questions?.length);
-
-    // Count questions per category from database
-    const categoryCounts = questions?.reduce((acc: Record<string, number>, { category }) => {
-      // Skip null or undefined categories
-      if (category && category !== 'null' && category !== 'undefined') {
-        acc[category] = (acc[category] || 0) + 1;
-      }
-      return acc;
-    }, {}) || {};
+    
+    // Note: Database question counts have been removed.
+    // All categories now come from TypeScript template files.
+    const categoryCounts: Record<string, number> = {};
 
     // Get categories from templates based on subject
     const templates = subject === 'Science'
@@ -55,7 +39,9 @@ export async function GET(request: Request) {
                 ? getComputingTemplates()
                 : subject === 'Education in Human Values'
                   ? getHumanValuesTemplates()
-                  : getAllTemplates();
+                  : subject === 'Mathematics Preview'
+                    ? getMathPreviewTemplates()
+                    : getAllTemplates();
     const templateCategories = new Set(templates.map(t => t.category));
 
     // For Science and Social Studies, only use templates (no database questions)
@@ -139,6 +125,20 @@ export async function GET(request: Request) {
         humanValuesCategories[template.category] = (humanValuesCategories[template.category] || 0) + 1;
       });
       const categories = Object.entries(humanValuesCategories)
+        .map(([category, count]) => ({
+          category,
+          questionCount: count
+        }))
+        .sort((a, b) => a.category.localeCompare(b.category));
+      return NextResponse.json({ categories });
+    }
+
+    if (subject === 'Mathematics Preview') {
+      const previewCategories: Record<string, number> = {};
+      templates.forEach(template => {
+        previewCategories[template.category] = (previewCategories[template.category] || 0) + 1;
+      });
+      const categories = Object.entries(previewCategories)
         .map(([category, count]) => ({
           category,
           questionCount: count

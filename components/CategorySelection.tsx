@@ -108,6 +108,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 // Subject emoji mapping
 const SUBJECT_EMOJIS: Record<string, string> = {
   'Mathematics': '🔢',
+  'Mathematics Preview': '🔬',
   'Science': '🔬',
   'English': '📚',
   'Social Studies': '🌍',

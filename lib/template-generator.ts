@@ -4,6 +4,7 @@ import { ENGLISH_CATEGORIES } from './english-templates';
 import { BUDDHISM_CATEGORIES } from './buddhism-templates';
 import { COMPUTING_CATEGORIES } from './computing-templates';
 import { HUMAN_VALUES_CATEGORIES } from './human-values-templates';
+import { MATH_PREVIEW_CATEGORIES } from './math-preview-templates';
 
 /**
  * Generate a random value based on variable definition
@@ -405,7 +406,9 @@ export function generateQuestionFromTemplate(template: QuestionTemplate): Genera
               ? 'Computing'
               : (HUMAN_VALUES_CATEGORIES as readonly string[]).includes(template.category)
                 ? 'Education in Human Values'
-                : 'Mathematics';
+                : (MATH_PREVIEW_CATEGORIES as readonly string[]).includes(template.category)
+                  ? 'Mathematics Preview'
+                  : 'Mathematics';
   
   return {
     id: `${template.id}-${Date.now()}-${Math.random()}`,

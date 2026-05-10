@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { Question } from '@/types/question';
 import { getAllTemplates, getTemplatesByCategory } from '@/lib/question-templates';
 import { getScienceTemplates } from '@/lib/science-templates';
@@ -8,6 +7,7 @@ import { getEnglishTemplates } from '@/lib/english-templates';
 import { getBuddhismTemplates } from '@/lib/buddhism-templates';
 import { getComputingTemplates } from '@/lib/computing-templates';
 import { getHumanValuesTemplates } from '@/lib/human-values-templates';
+import { getMathPreviewTemplates } from '@/lib/math-preview-templates';
 import { generateQuestionFromTemplate } from '@/lib/template-generator';
 
 // Force dynamic rendering for this API route
@@ -41,11 +41,13 @@ export async function GET(request: Request) {
                 ? getComputingTemplates()
                 : subject === 'Education in Human Values'
                   ? getHumanValuesTemplates()
-                  : getAllTemplates();
+                  : subject === 'Mathematics Preview'
+                    ? getMathPreviewTemplates()
+                    : getAllTemplates();
     
     // For Science, Social Studies, English, Buddhism, Computing, and Human Values, all categories use templates
     // For Mathematics, check which categories use dynamic templates
-    const dynamicCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Buddhism' || subject === 'Computing' || subject === 'Education in Human Values'
+    const dynamicCategories = subject === 'Science' || subject === 'Social Studies' || subject === 'English' || subject === 'Buddhism' || subject === 'Computing' || subject === 'Education in Human Values' || subject === 'Mathematics Preview'
       ? Array.from(new Set(allTemplates.map(t => t.category)))
       : [
           'Addition', 
@@ -122,64 +124,8 @@ export async function GET(request: Request) {
       }
     }
 
-    // Fetch static questions from database for non-dynamic categories
-    if (useStaticForCategories.length > 0 || !selectedCategories) {
-      let easyQuery = supabase
-        .from('questions')
-        .select('*')
-        .eq('difficulty', 'Easy');
-      
-      let mediumQuery = supabase
-        .from('questions')
-        .select('*')
-        .eq('difficulty', 'Medium');
-      
-      let hardQuery = supabase
-        .from('questions')
-        .select('*')
-        .eq('difficulty', 'Hard');
-
-      // Add category filter for static categories
-      if (useStaticForCategories.length > 0) {
-        easyQuery = easyQuery.in('category', useStaticForCategories);
-        mediumQuery = mediumQuery.in('category', useStaticForCategories);
-        hardQuery = hardQuery.in('category', useStaticForCategories);
-      }
-
-      const { data: easyQuestions, error: easyError } = await easyQuery.limit(100);
-      const { data: mediumQuestions, error: mediumError } = await mediumQuery.limit(100);
-      const { data: hardQuestions, error: hardError } = await hardQuery.limit(100);
-
-      if (easyError || mediumError || hardError) {
-        throw new Error('Failed to fetch questions from database');
-      }
-
-      if (easyQuestions?.length && mediumQuestions?.length && hardQuestions?.length) {
-        const neededEasy = 4 - allQuestions.filter(q => q.difficulty === 'Easy').length;
-        const neededMedium = 4 - allQuestions.filter(q => q.difficulty === 'Medium').length;
-        const neededHard = 2 - allQuestions.filter(q => q.difficulty === 'Hard').length;
-
-        const staticQuestions = [
-          ...getRandomItems(easyQuestions, neededEasy),
-          ...getRandomItems(mediumQuestions, neededMedium),
-          ...getRandomItems(hardQuestions, neededHard),
-        ].map(q => ({
-          id: q.id,
-          subject: q.subject,
-          category: q.category,
-          topic: q.topic,
-          difficulty: q.difficulty,
-          question: q.question,
-          options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
-          correctAnswer: q.correct_answer,
-          methodSteps: typeof q.method_steps === 'string' ? JSON.parse(q.method_steps) : q.method_steps,
-          questionType: q.question_type,
-          estimatedTimeSeconds: q.difficulty === 'Easy' ? 15 : q.difficulty === 'Medium' ? 20 : 30,
-        }));
-
-        allQuestions = [...allQuestions, ...staticQuestions];
-      }
-    }
+    // Note: Static database questions have been removed.
+    // All questions now come from TypeScript template files.
 
     // Require at least one question; allow quizzes with fewer than 10
     if (allQuestions.length === 0) {

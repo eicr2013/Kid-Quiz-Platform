@@ -101,7 +101,7 @@ export default function QuizContainer() {
 
   const handleSelectSubject = (subject: string) => {
     playClick();
-    const allowedSubjects = ['Mathematics', 'Science', 'Social Studies', 'English', 'Buddhism', 'Computing', 'Education in Human Values'];
+    const allowedSubjects = ['Mathematics', 'Mathematics Preview', 'Science', 'Social Studies', 'English', 'Buddhism', 'Computing', 'Education in Human Values'];
     if (!allowedSubjects.includes(subject)) {
       alert(`${subject} is coming soon! 🚀`);
       return;

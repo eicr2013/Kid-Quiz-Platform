@@ -9,6 +9,7 @@ interface SubjectSelectionProps {
 
 const SUBJECTS = [
   { name: 'Mathematics', emoji: '🔢', color: 'from-blue-500 to-purple-500' },
+  { name: 'Mathematics Preview', emoji: '🔬', color: 'from-indigo-500 to-blue-600', badge: '✨ REVIEW' },
   { name: 'Science', emoji: '🔬', color: 'from-green-500 to-teal-500' },
   { name: 'English', emoji: '📚', color: 'from-pink-500 to-rose-500' },
   { name: 'Social Studies', emoji: '🌍', color: 'from-orange-500 to-yellow-500' },
@@ -70,6 +71,11 @@ export default function SubjectSelection({
                 onClick={() => onSelectSubject(subject.name)}
                 className={`group relative overflow-hidden rounded-2xl p-8 bg-gradient-to-br ${subject.color} hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl`}
               >
+                {'badge' in subject && subject.badge && (
+                  <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">
+                    {subject.badge}
+                  </div>
+                )}
                 <div className="text-center">
                   <div className="text-7xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
                     {subject.emoji}
@@ -78,7 +84,7 @@ export default function SubjectSelection({
                     {subject.name}
                   </h2>
                   <p className="text-white opacity-90">
-                    Practice and improve!
+                    {'badge' in subject ? 'Preview & Test New Questions' : 'Practice and improve!'}
                   </p>
                 </div>
                 
