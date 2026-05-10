@@ -35,18 +35,21 @@ export default function QuizContainer() {
   const [showProgress, setShowProgress] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
 
-  const startNewSession = async (categories?: string[], subjectOverride?: string) => {
+  const startNewSession = async (categories?: string[], subjectOverride?: string, questionCount?: number) => {
     try {
       setLoading(true);
       setError(null);
       const subjectToUse = subjectOverride ?? selectedSubject;
-      // Build URL with categories and subject if provided
+      // Build URL with categories, subject, and question count if provided
       const params = new URLSearchParams();
       if (categories && categories.length > 0) {
         params.append('categories', categories.join(','));
       }
       if (subjectToUse) {
         params.append('subject', subjectToUse);
+      }
+      if (questionCount) {
+        params.append('count', questionCount.toString());
       }
       const queryString = params.toString() ? `?${params.toString()}` : '';
       
@@ -72,8 +75,8 @@ export default function QuizContainer() {
     }
   };
 
-  const handleCategorySelection = (categories: string[]) => {
-    startNewSession(categories);
+  const handleCategorySelection = (categories: string[], questionCount?: number) => {
+    startNewSession(categories, undefined, questionCount);
   };
 
   const handleRestartWithCategories = () => {
@@ -94,9 +97,9 @@ export default function QuizContainer() {
     setSelectedCategories([]);
   };
 
-  const handlePracticeCategory = (category: string, subject?: string) => {
+  const handlePracticeCategory = (category: string, subject?: string, questionCount?: number) => {
     setShowProgress(false);
-    startNewSession([category], subject);
+    startNewSession([category], subject, questionCount);
   };
 
   const handleSelectSubject = (subject: string) => {
@@ -202,8 +205,8 @@ export default function QuizContainer() {
   if (!quizStarted) {
     return (
       <>
-<CategorySelection 
-          onStartQuiz={(cats) => { playClick(); handleCategorySelection(cats); }}
+        <CategorySelection 
+          onStartQuiz={(cats, count) => { playClick(); handleCategorySelection(cats, count); }}
           onOpenSettings={() => { playClick(); setShowSettings(true); }}
           onOpenProgress={() => { playClick(); setShowProgress(true); }}
           onOpenDemo={() => { playClick(); setShowDemo(true); }}

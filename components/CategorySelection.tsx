@@ -9,7 +9,7 @@ interface Category {
 }
 
 interface CategorySelectionProps {
-  onStartQuiz: (selectedCategories: string[]) => void;
+  onStartQuiz: (selectedCategories: string[], questionCount?: number) => void;
   onOpenSettings?: () => void;
   onOpenProgress?: () => void;
   onOpenDemo?: () => void;
@@ -121,6 +121,7 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
   const { playClick } = useSound();
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [questionCount, setQuestionCount] = useState<number>(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -172,7 +173,7 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
       alert('Please select at least one category!');
       return;
     }
-    onStartQuiz(selectedCategories);
+    onStartQuiz(selectedCategories, questionCount);
   };
 
   if (loading) {
@@ -245,7 +246,32 @@ export default function CategorySelection({ onStartQuiz, onOpenSettings, onOpenP
               {SUBJECT_EMOJIS[subject || 'Mathematics'] || '📚'} {subject || 'Mathematics'} Topics
             </h1>
             <p className="text-gray-600 text-lg">
-              Select one or more topics. You'll get 10 questions to practice!
+              Select topics and choose how many questions you want!
+            </p>
+          </div>
+
+          {/* Question Count Selector */}
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 mb-6">
+            <label className="block text-center mb-3">
+              <span className="text-lg font-semibold text-gray-700">📊 Number of Questions</span>
+            </label>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {[5, 10, 15, 20, 30, 50].map(count => (
+                <button
+                  key={count}
+                  onClick={() => { playClick(); setQuestionCount(count); }}
+                  className={`px-6 py-3 rounded-lg font-bold text-lg transition-all ${
+                    questionCount === count
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg transform scale-110'
+                      : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-purple-400 hover:shadow-md'
+                  }`}
+                >
+                  {count}
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-sm text-gray-500 mt-3">
+              {questionCount < 10 ? '⚡ Quick practice' : questionCount < 20 ? '📚 Standard quiz' : questionCount < 40 ? '🎯 Extended practice' : '💪 Challenge mode'}
             </p>
           </div>
 

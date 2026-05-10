@@ -18,7 +18,7 @@ const SUBJECT_EMOJIS: Record<string, string> = {
 interface ProgressReviewProps {
   isOpen: boolean;
   onClose: () => void;
-  onPracticeCategory: (category: string, subject?: string) => void;
+  onPracticeCategory: (category: string, subject?: string, questionCount?: number) => void;
   subject?: string | null;
 }
 

@@ -14,18 +14,21 @@ import { generateQuestionFromTemplate } from '@/lib/template-generator';
 export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/quiz/session?categories=Category1,Category2&subject=Mathematics
- * Fetches a new quiz session with 10 random questions
+ * GET /api/quiz/session?categories=Category1,Category2&subject=Mathematics&count=10
+ * Fetches a new quiz session with specified number of questions (default: 10)
  * Uses dynamic templates for Addition, Subtraction, Multiplication, Division, Fractions, Units of Time
  * Ensures balanced difficulty distribution
- * Optional: Filter by categories (comma-separated) and subject
+ * Optional: Filter by categories (comma-separated), subject, and count
  */
 export async function GET(request: Request) {
   try {
-    // Get categories and subject from query parameters
+    // Get categories, subject, and count from query parameters
     const { searchParams } = new URL(request.url);
     const categoriesParam = searchParams.get('categories');
     const subject = searchParams.get('subject') || 'Mathematics';
+    const countParam = searchParams.get('count');
+    const requestedCount = countParam ? parseInt(countParam, 10) : 10;
+    const questionCount = Math.max(1, Math.min(requestedCount, 100)); // Min 1, Max 100
     const selectedCategories = categoriesParam ? categoriesParam.split(',').map(c => c.trim()) : null;
 
     // Get the appropriate templates based on subject
@@ -102,24 +105,49 @@ export async function GET(request: Request) {
           allQuestions.push(generateQuestionFromTemplate(template));
         });
       } else {
-        // Dynamic templates (Math) - generate 4 Easy, 4 Medium, 2 Hard with repetition allowed
-        for (let i = 0; i < 4; i++) {
-          if (easyTemplates.length > 0) {
-            const template = easyTemplates[Math.floor(Math.random() * easyTemplates.length)];
-            allQuestions.push(generateQuestionFromTemplate(template));
+        // Dynamic templates (Math) - generate unique questions with balanced difficulty distribution
+        // NO REPETITION: Each template used only once
+        // Distribution goal: 40% Easy, 40% Medium, 20% Hard
+        
+        // Calculate maximum available unique questions
+        const maxAvailable = easyTemplates.length + mediumTemplates.length + hardTemplates.length;
+        const actualCount = Math.min(questionCount, maxAvailable);
+        
+        // Calculate counts respecting available templates
+        let easyCount = Math.min(Math.ceil(actualCount * 0.4), easyTemplates.length);
+        let mediumCount = Math.min(Math.ceil(actualCount * 0.4), mediumTemplates.length);
+        let hardCount = Math.min(actualCount - easyCount - mediumCount, hardTemplates.length);
+        
+        // Adjust if we still need more questions and have templates available
+        const stillNeeded = actualCount - (easyCount + mediumCount + hardCount);
+        if (stillNeeded > 0) {
+          // Fill remaining with available templates
+          if (easyCount < easyTemplates.length) {
+            const canAdd = Math.min(stillNeeded, easyTemplates.length - easyCount);
+            easyCount += canAdd;
+          } else if (mediumCount < mediumTemplates.length) {
+            const canAdd = Math.min(stillNeeded, mediumTemplates.length - mediumCount);
+            mediumCount += canAdd;
+          } else if (hardCount < hardTemplates.length) {
+            const canAdd = Math.min(stillNeeded, hardTemplates.length - hardCount);
+            hardCount += canAdd;
           }
         }
-        for (let i = 0; i < 4; i++) {
-          if (mediumTemplates.length > 0) {
-            const template = mediumTemplates[Math.floor(Math.random() * mediumTemplates.length)];
-            allQuestions.push(generateQuestionFromTemplate(template));
-          }
+        
+        // Shuffle templates to ensure randomness WITHOUT repetition
+        const shuffledEasy = shuffleArray([...easyTemplates]);
+        const shuffledMedium = shuffleArray([...mediumTemplates]);
+        const shuffledHard = shuffleArray([...hardTemplates]);
+        
+        // Generate questions (each template used once)
+        for (let i = 0; i < easyCount; i++) {
+          allQuestions.push(generateQuestionFromTemplate(shuffledEasy[i]));
         }
-        for (let i = 0; i < 2; i++) {
-          if (hardTemplates.length > 0) {
-            const template = hardTemplates[Math.floor(Math.random() * hardTemplates.length)];
-            allQuestions.push(generateQuestionFromTemplate(template));
-          }
+        for (let i = 0; i < mediumCount; i++) {
+          allQuestions.push(generateQuestionFromTemplate(shuffledMedium[i]));
+        }
+        for (let i = 0; i < hardCount; i++) {
+          allQuestions.push(generateQuestionFromTemplate(shuffledHard[i]));
         }
       }
     }
@@ -127,7 +155,7 @@ export async function GET(request: Request) {
     // Note: Static database questions have been removed.
     // All questions now come from TypeScript template files.
 
-    // Require at least one question; allow quizzes with fewer than 10
+    // Require at least one question
     if (allQuestions.length === 0) {
       return NextResponse.json(
         { error: 'No questions available for the selected categories. Try selecting more categories or a different subject.' },
@@ -135,8 +163,8 @@ export async function GET(request: Request) {
       );
     }
 
-    // Shuffle and take up to 10 questions (or all if fewer)
-    const totalToTake = Math.min(10, allQuestions.length);
+    // Shuffle and take up to requested count (or all available if fewer)
+    const totalToTake = Math.min(questionCount, allQuestions.length);
     const shuffledQuestions = shuffleArray(allQuestions).slice(0, totalToTake);
 
     return NextResponse.json({
